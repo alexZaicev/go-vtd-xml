@@ -12,11 +12,10 @@ const (
 type FastObjectBufferOption func(*FastObjectBuffer)
 
 type ObjectBuffer interface {
+	Buffer
 	ObjectAt(index int) (interface{}, error)
 	ModifyEntry(index int, value interface{}) error
-	Size() int
 	Append(value interface{}) error
-	Clear()
 }
 
 type FastObjectBuffer struct {
@@ -86,8 +85,12 @@ func (b *FastObjectBuffer) ModifyEntry(index int, value interface{}) error {
 	return b.buffer.Set(pageNum, bufferSlice)
 }
 
-func (b *FastObjectBuffer) Size() int {
+func (b *FastObjectBuffer) GetSize() int {
 	return b.size
+}
+
+func (b *FastObjectBuffer) SetSize(size int) {
+	b.size = size
 }
 
 func (b *FastObjectBuffer) Append(value interface{}) error {

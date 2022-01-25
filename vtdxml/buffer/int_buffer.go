@@ -12,12 +12,11 @@ const (
 type FastIntBufferOption func(*FastIntBuffer)
 
 type IntBuffer interface {
+	Buffer
 	IntAt(index int) (int32, error)
 	ModifyEntry(index int, value int32) error
-	Size() int
 	ToIntArray() ([]int32, error)
 	Append(value int32) error
-	Clear()
 }
 
 type FastIntBuffer struct {
@@ -90,8 +89,12 @@ func (b *FastIntBuffer) ModifyEntry(index int, value int32) error {
 	return b.buffer.Set(pageNum, bufferSlice)
 }
 
-func (b *FastIntBuffer) Size() int {
+func (b *FastIntBuffer) GetSize() int {
 	return b.size
+}
+
+func (b *FastIntBuffer) SetSize(size int) {
+	b.size = size
 }
 
 // ToIntArray function converts 2D buffer into int32 slice

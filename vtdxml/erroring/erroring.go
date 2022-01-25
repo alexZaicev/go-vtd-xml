@@ -2,15 +2,6 @@ package erroring
 
 import "fmt"
 
-// InternalErrorType for usage with std library errors.As
-var InternalErrorType = &InternalError{}
-
-// InvalidArgumentErrorType for usage with std library errors.As
-var InvalidArgumentErrorType = &InvalidArgumentError{}
-
-// ParseErrorType for usage with std library errors.As
-var ParseErrorType = &ParseError{}
-
 // baseError represents a generic error from the domain package that provides
 // 'error' functionality to the rest of the typed errors in the package.
 type baseError struct {
@@ -87,7 +78,7 @@ func NewInternalError(msg string, err error) *InternalError {
 	}
 }
 
-// ParseError represent a some sort od parsing error that may occur trying to
+// ParseError represent a some sort of parsing error that may occur trying to
 // convert non-numeric string to a number.
 type ParseError struct {
 	baseError
@@ -95,11 +86,45 @@ type ParseError struct {
 }
 
 // NewParseError constructs a new ParseError, wrapping the provided error.
-func NewParseError(msg string, err error) *InternalError {
-	return &InternalError{
+func NewParseError(msg string, lineNumber string, err error) *ParseError {
+	return &ParseError{
 		baseError: newBaseError(
-			fmt.Sprintf("a parse error occurred: %s", msg),
+			fmt.Sprintf("a parse error occurred: %s %s", msg, lineNumber),
 			err,
+		),
+	}
+}
+
+// EncodingError represents some sort of character encoding error that may occur
+// during reading string with incorrect reader
+type EncodingError struct {
+	baseError
+	Msg string
+}
+
+// NewEncodingError constructs a new EncodingError, wrapping the provided error.
+func NewEncodingError(msg string) *EncodingError {
+	return &EncodingError{
+		baseError: newBaseError(
+			fmt.Sprintf("unknown character encoding: %s", msg),
+			nil,
+		),
+	}
+}
+
+// EntityError represents some sort of character entity error that may occur when
+// XML or HTML file contains invalid entity representation of characters
+type EntityError struct {
+	baseError
+	Msg string
+}
+
+// NewEntityError constructs a new EntityError, wrapping the provided error.
+func NewEntityError(msg string) *EntityError {
+	return &EntityError{
+		baseError: newBaseError(
+			fmt.Sprintf("unknown character encoding: %s", msg),
+			nil,
 		),
 	}
 }

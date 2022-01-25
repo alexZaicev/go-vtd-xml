@@ -12,14 +12,13 @@ const (
 type FastLongBufferOption func(*FastLongBuffer)
 
 type LongBuffer interface {
+	Buffer
 	LongAt(index int) (int64, error)
 	ModifyEntry(index int, value int64) error
-	Size() int
 	Lower32At(index int) (int32, error)
 	Upper32At(index int) (int32, error)
 	ToLongArray() ([]int64, error)
 	Append(value int64) error
-	Clear()
 }
 
 type FastLongBuffer struct {
@@ -88,8 +87,12 @@ func (b *FastLongBuffer) ModifyEntry(index int, value int64) error {
 	return b.buffer.Set(pageNum, bufferSlice)
 }
 
-func (b *FastLongBuffer) Size() int {
+func (b *FastLongBuffer) GetSize() int {
 	return b.size
+}
+
+func (b *FastLongBuffer) SetSize(size int) {
+	b.size = size
 }
 
 // Lower32At function return lower 32 bit of the int64 at the index

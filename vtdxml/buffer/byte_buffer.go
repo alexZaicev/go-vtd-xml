@@ -3,10 +3,10 @@ package buffer
 import "github.com/alexZaicev/go-vtd-xml/vtdxml/erroring"
 
 type ByteBuffer interface {
+	Buffer
 	ByteAt(index int) (byte, error)
 	GetByteSlice(offset int, length int) ([]byte, error)
 	GetBytes() []byte
-	Size() int
 }
 
 type UniByteBuffer struct {
@@ -43,6 +43,14 @@ func (b *UniByteBuffer) GetBytes() []byte {
 	return b.buffer
 }
 
-func (b *UniByteBuffer) Size() int {
+func (b *UniByteBuffer) GetSize() int {
 	return len(b.buffer)
+}
+
+func (b *UniByteBuffer) SetSize(size int) {
+	// DO NOTHING
+}
+
+func (b *UniByteBuffer) Clear() {
+	// DO NOTHING
 }

@@ -8,42 +8,42 @@ import (
 	"github.com/alexZaicev/go-vtd-xml/vtdxml/erroring"
 )
 
-type AsciiReader struct {
+type Utf8Reader struct {
 	xmlDoc    []byte
 	offset    int
 	endOffset int
 }
 
-func NewAsciiReader(xmlDoc []byte, offset, endOffset int) (AsciiReader, error) {
+func NewUtf8Reader(xmlDoc []byte, offset, endOffset int) (Utf8Reader, error) {
 	if xmlDoc == nil {
-		return AsciiReader{}, erroring.NewInvalidArgumentError("xmlDoc", erroring.CannotBeNil, nil)
+		return Utf8Reader{}, erroring.NewInvalidArgumentError("xmlDoc", erroring.CannotBeNil, nil)
 	}
 	if offset < 0 {
-		return AsciiReader{}, erroring.NewInvalidArgumentError("offset", erroring.IndexOutOfRange, nil)
+		return Utf8Reader{}, erroring.NewInvalidArgumentError("offset", erroring.IndexOutOfRange, nil)
 	}
 	if endOffset < 0 || endOffset >= len(xmlDoc) {
-		return AsciiReader{}, erroring.NewInvalidArgumentError("endOffset", erroring.IndexOutOfRange, nil)
+		return Utf8Reader{}, erroring.NewInvalidArgumentError("endOffset", erroring.IndexOutOfRange, nil)
 	}
-	return AsciiReader{
+	return Utf8Reader{
 		xmlDoc:    xmlDoc,
 		offset:    offset,
 		endOffset: endOffset,
 	}, nil
 }
 
-func (r *AsciiReader) GetChar() (uint32, error) {
+func (r *Utf8Reader) GetChar() (uint32, error) {
 	if r.offset >= r.endOffset {
 		return 0, io.EOF
 	}
 	ch := r.xmlDoc[r.offset]
 	r.offset++
-	if !r.isASCII(ch) {
+	if !r.isUTF8(ch) {
 		return 0, erroring.NewParseError("invalid ASCII character", "", nil)
 	}
 	return uint32(ch), nil
 }
 
-func (r *AsciiReader) GetLongChar(offset uint32) (uint64, error) {
+func (r *Utf8Reader) GetLongChar(offset uint32) (uint64, error) {
 	ch := r.xmlDoc[offset]
 	if ch == byte('\r') && r.xmlDoc[offset+1] == byte('\n') {
 		return (2 << 32) | '\n', nil
@@ -51,7 +51,7 @@ func (r *AsciiReader) GetLongChar(offset uint32) (uint64, error) {
 	return (1 << 32) | uint64(ch), nil
 }
 
-func (r *AsciiReader) SkipChar(ch uint32) bool {
+func (r *Utf8Reader) SkipChar(ch uint32) bool {
 	if ch == uint32(r.xmlDoc[r.offset]) {
 		r.offset++
 		return true
@@ -60,11 +60,11 @@ func (r *AsciiReader) SkipChar(ch uint32) bool {
 	}
 }
 
-func (r *AsciiReader) Decode(offset uint32) (string, error) {
+func (r *Utf8Reader) Decode(offset uint32) (string, error) {
 	return fmt.Sprintf("%c", r.xmlDoc[offset]), nil
 }
 
-// isASCII function to validate if a character is a valid ASCII character
-func (r *AsciiReader) isASCII(ch uint8) bool {
-	return ch <= unicode.MaxASCII
+// isUTF8 function to validate if a character is a valid ASCII character
+func (r *Utf8Reader) isUTF8(ch uint8) bool {
+	return uint32(ch) <= unicode.MaxRune
 }
