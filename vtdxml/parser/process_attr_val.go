@@ -335,6 +335,9 @@ func (p *VtdParser) getCharResolved(offset int) (int64, error) {
 					offset += p.increment
 					inc += p.increment
 					ch, err = p.getCharUnit(offset)
+					if err != nil {
+						return 0, err
+					}
 					if ch >= '0' && ch <= '9' {
 						val = (val << 4) + (ch - '0')
 					} else if ch >= 'a' && ch <= 'f' {
@@ -349,6 +352,9 @@ func (p *VtdParser) getCharResolved(offset int) (int64, error) {
 			} else {
 				for {
 					ch, err = p.getCharUnit(offset)
+					if err != nil {
+						return 0, err
+					}
 					offset += p.increment
 					inc += p.increment
 					if ch >= '0' && ch <= '9' {

@@ -300,7 +300,7 @@ func (p *VtdParser) getPrevOffset() (int, error) {
 	prevOffset := p.offset
 	switch p.encoding {
 	case FormatUtf8:
-		for p.xmlDoc[prevOffset] < 0 && p.xmlDoc[prevOffset]&byte(0xc0) == byte(0x80) {
+		for p.xmlDoc[prevOffset]&byte(0xc0) == byte(0x80) {
 			prevOffset--
 		}
 		return prevOffset, nil
@@ -311,7 +311,7 @@ func (p *VtdParser) getPrevOffset() (int, error) {
 		FormatWin1253, FormatWin1254, FormatWin1255, FormatWin1256, FormatWin1257, FormatWin1258:
 		return p.offset - 1, nil
 	case FormatUtf16LE, FormatUtf16BE:
-		temp := uint32((p.xmlDoc[p.offset]&(0xff))<<8 | (p.xmlDoc[p.offset+1] & 0xff))
+		temp := (uint32(p.xmlDoc[p.offset])&0xFFFF)<<8 | (uint32(p.xmlDoc[p.offset+1]) & 0xFFFF)
 		if temp < 0xd800 || temp > 0xdfff {
 			return p.offset - 2, nil
 		}
@@ -581,6 +581,9 @@ func (p *VtdParser) entityIdentifier() (uint32, error) {
 			if ch == 'x' {
 				for {
 					ch, err = p.reader.GetChar()
+					if err != nil {
+						return 0, err
+					}
 					if ch >= '0' && ch <= '9' {
 						value = (value << 4) + (ch - '0')
 					} else if ch >= 'a' && ch <= 'f' {

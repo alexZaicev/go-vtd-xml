@@ -12,14 +12,7 @@ build:
 	$(GOBUILD) ./...
 
 .PHONY: lint
-lint: golint helmlint
-
-.PHONY: helmlint
-helmlint:
-	helm lint $(shell find $(HELM_DIR) -mindepth 1 -maxdepth 1 -type d)
-
-.PHONY: golint
-golint: vendor
+lint:
 	golangci-lint run
 
 .PHONY: unit

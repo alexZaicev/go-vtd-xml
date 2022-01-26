@@ -24,25 +24,18 @@ func (p *VtdParser) Parse() error {
 		switch parserState {
 		case StateLtSeen:
 			parserState, err = p.processLtSeen()
-			break
 		case StateStartTag:
 			parserState, err = p.processStartTag()
-			break
 		case StateEndTag:
 			parserState, err = p.processEndTag()
-			break
 		case StateAttrName:
 			parserState, err = p.processAttrName()
-			break
 		case StateAttrVal:
 			parserState, err = p.processAttrVal()
-			break
 		case StateText:
 			parserState, err = p.processText()
-			break
 		case StateDocStart:
 			parserState, err = p.processDocStart()
-			break
 		case StateDocEnd:
 		case StatePiTag:
 		case StatePiVal:
@@ -52,7 +45,6 @@ func (p *VtdParser) Parse() error {
 		case StateCdata:
 		case StateDocType:
 			parserState, err = p.processDocType()
-			break
 		case StateEndPi:
 		default:
 			return erroring.NewParseError(

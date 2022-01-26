@@ -68,6 +68,9 @@ func (p *VtdParser) processQmSeen() (State, error) {
 			(p.reader.SkipChar('m') || p.reader.SkipChar('M')) &&
 			(p.reader.SkipChar('l') || p.reader.SkipChar('L')) {
 			ch, err = p.reader.GetChar()
+			if err != nil {
+				return StateInvalid, err
+			}
 			if ch == '?' || p.xmlChar.IsSpaceChar(ch) {
 				return StateInvalid, erroring.NewParseError("[xX][mM][lL] not a valid PI target name",
 					p.fmtLine(), nil)
