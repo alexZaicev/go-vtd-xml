@@ -1,9 +1,10 @@
 package buffer
 
 import (
-	"github.com/stretchr/testify/assert"
 	"math/rand"
 	"testing"
+
+	"github.com/stretchr/testify/assert"
 )
 
 func Test_NewUniByteBuffer_Success(t *testing.T) {
@@ -13,7 +14,7 @@ func Test_NewUniByteBuffer_Success(t *testing.T) {
 	buffer, err := NewUniByteBuffer(bytes)
 	assert.Nil(t, err)
 	assert.NotNil(t, buffer)
-	assert.Equal(t, 1024, buffer.Size())
+	assert.Equal(t, 1024, buffer.GetSize())
 }
 
 func Test_NewUniByteBuffer_InvalidArguments(t *testing.T) {
@@ -153,7 +154,7 @@ func getInitializedBuffer(t *testing.T) UniByteBuffer {
 	buffer, err := NewUniByteBuffer(bytes)
 	assert.Nil(t, err)
 	assert.NotNil(t, buffer)
-	assert.Equal(t, 1024, buffer.Size())
+	assert.Equal(t, 1024, buffer.GetSize())
 	assert.Equal(t, bytes, buffer.GetBytes())
 
 	return buffer

@@ -1,6 +1,20 @@
 package erroring
 
-import "fmt"
+import (
+	"fmt"
+)
+
+var InvalidArgumentErrorType = &InvalidArgumentError{}
+
+var InternalErrorType = &InternalError{}
+
+var ParseErrorType = &ParseError{}
+
+var EncodingErrorType = &EncodingError{}
+
+var EntityErrorType = &EntityError{}
+
+var EOFErrorType = &EOFError{}
 
 // baseError represents a generic error from the domain package that provides
 // 'error' functionality to the rest of the typed errors in the package.
@@ -124,6 +138,22 @@ func NewEntityError(msg string) *EntityError {
 	return &EntityError{
 		baseError: newBaseError(
 			fmt.Sprintf("unknown character encoding: %s", msg),
+			nil,
+		),
+	}
+}
+
+// EOFError represents end of file error
+type EOFError struct {
+	baseError
+	Msg string
+}
+
+// NewEOFError constructs a new EOFError, wrapping the provided error.
+func NewEOFError(msg string) *EOFError {
+	return &EOFError{
+		baseError: newBaseError(
+			fmt.Sprintf("premature EOF reached: %s", msg),
 			nil,
 		),
 	}

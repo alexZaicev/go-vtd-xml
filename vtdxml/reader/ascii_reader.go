@@ -1,8 +1,6 @@
 package reader
 
 import (
-	"fmt"
-	"io"
 	"unicode"
 
 	"github.com/alexZaicev/go-vtd-xml/vtdxml/erroring"
@@ -33,7 +31,7 @@ func NewAsciiReader(xmlDoc []byte, offset, endOffset int) (AsciiReader, error) {
 
 func (r *AsciiReader) GetChar() (uint32, error) {
 	if r.offset >= r.endOffset {
-		return 0, io.EOF
+		return 0, erroring.NewEOFError(erroring.XmlIncomplete)
 	}
 	ch := r.xmlDoc[r.offset]
 	r.offset++
@@ -43,7 +41,7 @@ func (r *AsciiReader) GetChar() (uint32, error) {
 	return uint32(ch), nil
 }
 
-func (r *AsciiReader) GetLongChar(offset uint32) (uint64, error) {
+func (r *AsciiReader) GetLongChar(offset int32) (uint64, error) {
 	ch := r.xmlDoc[offset]
 	if ch == byte('\r') && r.xmlDoc[offset+1] == byte('\n') {
 		return (2 << 32) | '\n', nil
@@ -60,8 +58,17 @@ func (r *AsciiReader) SkipChar(ch uint32) bool {
 	}
 }
 
-func (r *AsciiReader) Decode(offset uint32) (string, error) {
-	return fmt.Sprintf("%c", r.xmlDoc[offset]), nil
+func (r *AsciiReader) SkipCharSeq(seq string) bool {
+	for _, ch := range seq {
+		if !r.SkipChar(uint32(ch)) {
+			return false
+		}
+	}
+	return true
+}
+
+func (r *AsciiReader) Decode(offset int32) (uint32, error) {
+	return uint32(r.xmlDoc[offset]), nil
 }
 
 // isASCII function to validate if a character is a valid ASCII character

@@ -2,7 +2,8 @@ package reader
 
 type Reader interface {
 	GetChar() (uint32, error)
-	GetLongChar(offset uint32) (uint64, error)
+	GetLongChar(offset int32) (uint64, error)
 	SkipChar(ch uint32) bool
-	Decode(offset uint32) (string, error)
+	SkipCharSeq(seq string) bool
+	Decode(offset int32) (uint32, error)
 }

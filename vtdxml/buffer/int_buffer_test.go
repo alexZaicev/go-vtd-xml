@@ -1,8 +1,9 @@
 package buffer
 
 import (
-	"github.com/stretchr/testify/assert"
 	"testing"
+
+	"github.com/stretchr/testify/assert"
 )
 
 const (
@@ -147,7 +148,7 @@ func Test_FastIntBuffer_ModifyEntry_InvalidArgument(t *testing.T) {
 func Test_FastIntBuffer_Clear_Success(t *testing.T) {
 	buffer := getInitializedFastIntBuffer(t)
 	buffer.Clear()
-	assert.Equal(t, 0, buffer.Size())
+	assert.Equal(t, 0, buffer.GetSize())
 }
 
 func getInitializedFastIntBuffer(t *testing.T) FastIntBuffer {
@@ -161,7 +162,7 @@ func getInitializedFastIntBuffer(t *testing.T) FastIntBuffer {
 	}
 
 	// we expect our buffer to have exactly 1 page
-	assert.Equal(t, 1, buffer.Size())
+	assert.Equal(t, 1, buffer.GetSize())
 
 	intSlice, err := buffer.ToIntArray()
 	assert.Nil(t, err)

@@ -1,8 +1,9 @@
 package buffer
 
 import (
-	"github.com/stretchr/testify/assert"
 	"testing"
+
+	"github.com/stretchr/testify/assert"
 )
 
 const (
@@ -147,7 +148,7 @@ func Test_FastLongBuffer_ModifyEntry_InvalidArgument(t *testing.T) {
 func Test_FastLongBuffer_Clear_Success(t *testing.T) {
 	buffer := getInitializedFastLongBuffer(t)
 	buffer.Clear()
-	assert.Equal(t, 0, buffer.Size())
+	assert.Equal(t, 0, buffer.GetSize())
 }
 
 func Test_FastLongBuffer_Lower32At_Success(t *testing.T) {
@@ -323,7 +324,7 @@ func getInitializedFastLongBuffer(t *testing.T) FastLongBuffer {
 	}
 
 	// we expect our buffer to have exactly 1 page
-	assert.Equal(t, 1, buffer.Size())
+	assert.Equal(t, 1, buffer.GetSize())
 
 	longSlice, err := buffer.ToLongArray()
 	assert.Nil(t, err)

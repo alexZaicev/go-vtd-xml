@@ -2,8 +2,9 @@ package buffer
 
 import (
 	"fmt"
-	"github.com/stretchr/testify/assert"
 	"testing"
+
+	"github.com/stretchr/testify/assert"
 )
 
 const (
@@ -172,7 +173,7 @@ func Test_FastObjectBuffer_ModifyEntry_InvalidArgument(t *testing.T) {
 func Test_FastObjectBuffer_Clear_Success(t *testing.T) {
 	buffer := getInitializedFastObjectBuffer(t)
 	buffer.Clear()
-	assert.Equal(t, 0, buffer.Size())
+	assert.Equal(t, 0, buffer.GetSize())
 }
 
 func getInitializedFastObjectBuffer(t *testing.T) FastObjectBuffer {
@@ -201,7 +202,7 @@ func getInitializedFastObjectBuffer(t *testing.T) FastObjectBuffer {
 	}
 
 	// we expect our buffer to have exactly 1 page
-	assert.Equal(t, 1, buffer.Size())
+	assert.Equal(t, 1, buffer.GetSize())
 
 	return buffer
 }
