@@ -24,3 +24,37 @@ func (p *VtdParser) validateSeq(seq string) error {
 	}
 	return nil
 }
+
+func (p *VtdParser) getNextProcessStateFromChar(ch uint32) (State, error) {
+	if ch == '<' {
+		if p.ws {
+			if err := p.recordWhiteSpace(); err != nil {
+				return StateInvalid, err
+			}
+		}
+		return StateLtSeen, nil
+	}
+	if ch == '&' {
+		ch, err := p.entityIdentifier()
+		if err != nil {
+			return StateInvalid, err
+		}
+		if !p.xmlChar.IsValidChar(ch) {
+			return StateInvalid, erroring.NewParseError(erroring.InvalidChar, p.fmtLine(), nil)
+		}
+		return StateText, nil
+	}
+	if ch == ']' {
+		// skip all ] chars
+		for p.reader.SkipChar(']') {
+		}
+		if p.reader.SkipChar('>') {
+			return StateInvalid, erroring.NewParseError("]]> sequence in text content", p.fmtLine(), nil)
+		}
+		return StateText, nil
+	}
+	if p.xmlChar.IsContentChar(ch) {
+		return StateText, nil
+	}
+	return StateInvalid, erroring.NewParseError(erroring.InvalidChar, p.fmtLine(), nil)
+}
