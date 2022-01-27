@@ -26,7 +26,7 @@ func (p *VtdParser) processElementTail() (State, error) {
 						}
 					}
 				}
-				return StateEndTag, nil
+				return StateTagEnd, nil
 			}
 			return StateLtSeen, nil
 		} else if p.xmlChar.IsContentChar(p.currentChar) {

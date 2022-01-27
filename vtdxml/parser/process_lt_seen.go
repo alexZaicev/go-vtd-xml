@@ -9,11 +9,11 @@ func (p *VtdParser) processLtSeen() (State, error) {
 	}
 	if p.xmlChar.IsNameStartChar(ch) {
 		p.depth++
-		return StateStartTag, nil
+		return StateTagStart, nil
 	} else {
 		switch ch {
 		case '/':
-			return StateEndTag, nil
+			return StateTagEnd, nil
 		case '!':
 			return p.processExSeen()
 		case '?':

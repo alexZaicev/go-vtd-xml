@@ -22,30 +22,33 @@ func (p *VtdParser) Parse() error {
 
 	for {
 		switch parserState {
+		case StateDocType:
+			parserState, err = p.processDocType()
+		case StateDocStart:
+			parserState, err = p.processDocStart()
+		case StateDocEnd:
+			parserState, err = p.processDocEnd()
 		case StateLtSeen:
 			parserState, err = p.processLtSeen()
-		case StateStartTag:
+		case StateTagStart:
 			parserState, err = p.processStartTag()
-		case StateEndTag:
+		case StateTagEnd:
 			parserState, err = p.processEndTag()
 		case StateAttrName:
 			parserState, err = p.processAttrName()
 		case StateAttrVal:
 			parserState, err = p.processAttrVal()
+		case StateDecAttrName:
+			parserState, err = p.processDecAttrName()
 		case StateText:
 			parserState, err = p.processText()
-		case StateDocStart:
-			parserState, err = p.processDocStart()
-		case StateDocEnd:
 		case StatePiTag:
+			parserState, err = p.processPiTag()
 		case StatePiVal:
-		case StateDecAttrName:
+		case StatePiEnd:
 		case StateStartComment:
 		case StateEndComment:
 		case StateCdata:
-		case StateDocType:
-			parserState, err = p.processDocType()
-		case StateEndPi:
 		default:
 			return erroring.NewParseError(
 				"invalid parser state", p.fmtLine(), nil,

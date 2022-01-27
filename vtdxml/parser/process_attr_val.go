@@ -77,20 +77,8 @@ func (p *VtdParser) processAttrVal() (State, error) {
 			)
 		}
 	}
-	if p.singleByteEncoding {
-		if p.length1 > maxTokenLength {
-			return StateInvalid, erroring.NewParseError(erroring.AttrValueTooLong, p.fmtLine(), nil)
-		}
-		if err := p.writeVtd(TokenAttrVal, p.lastOffset, p.length1, p.depth); err != nil {
-			return StateInvalid, err
-		}
-	} else {
-		if p.length1 > maxTokenLength<<1 {
-			return StateInvalid, erroring.NewParseError(erroring.AttrValueTooLong, p.fmtLine(), nil)
-		}
-		if err := p.writeVtd(TokenAttrVal, p.lastOffset>>1, p.length1>>1, p.depth); err != nil {
-			return StateInvalid, err
-		}
+	if err := p.writeVtdWithLengthCheck(TokenAttrVal, erroring.AttrValueTooLong); err != nil {
+		return StateInvalid, err
 	}
 	p.isXml, p.isNs = false, false
 	if err := p.nextChar(); err != nil {

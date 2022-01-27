@@ -29,8 +29,8 @@ type State int
 
 const (
 	StateLtSeen State = iota
-	StateStartTag
-	StateEndTag
+	StateTagStart
+	StateTagEnd
 	StateAttrName
 	StateAttrVal
 	StateText
@@ -43,7 +43,7 @@ const (
 	StateEndComment
 	StateCdata
 	StateDocType
-	StateEndPi
+	StatePiEnd
 	StateInvalid State = -1
 )
 
@@ -250,6 +250,25 @@ func (p *VtdParser) writeVtdText(tokenType Token, offset, length, depth int) err
 	} else {
 		return p.writeVtd(tokenType, offset, length, depth)
 	}
+}
+
+func (p *VtdParser) writeVtdWithLengthCheck(tokenType Token, errMsg string) error {
+	if p.singleByteEncoding {
+		if p.length1 > maxTokenLength {
+			return erroring.NewParseError(errMsg, p.fmtLine(), nil)
+		}
+		if err := p.writeVtd(tokenType, p.lastOffset, p.length1, p.depth); err != nil {
+			return err
+		}
+	} else {
+		if p.length1 > maxTokenLength<<1 {
+			return erroring.NewParseError(errMsg, p.fmtLine(), nil)
+		}
+		if err := p.writeVtd(tokenType, p.lastOffset>>1, p.length1>>1, p.depth); err != nil {
+			return err
+		}
+	}
+	return nil
 }
 
 // fmtLine function format error message with current line number and

@@ -24,21 +24,8 @@ func (p *VtdParser) processDocType() (State, error) {
 	}
 
 	p.length1 = p.offset - p.lastOffset - p.increment
-
-	if p.singleByteEncoding {
-		if p.length1 > maxTokenLength {
-			return StateInvalid, erroring.NewParseError("DTD value too long >0xFFFFF", p.fmtLine(), nil)
-		}
-		if err := p.writeVtd(TokenDtdVal, p.lastOffset, p.length1, p.depth); err != nil {
-			return StateInvalid, err
-		}
-	} else {
-		if p.length1 > maxTokenLength<<1 {
-			return StateInvalid, erroring.NewParseError("DTD value too long >0xFFFFF", p.fmtLine(), nil)
-		}
-		if err := p.writeVtd(TokenDtdVal, p.lastOffset>>1, p.length1>>1, p.depth); err != nil {
-			return StateInvalid, err
-		}
+	if err := p.writeVtdWithLengthCheck(TokenDtdVal, "DTD value too long >0xFFFFF"); err != nil {
+		return StateInvalid, err
 	}
 	if err := p.nextCharAfterWs(); err != nil {
 		return StateInvalid, err
