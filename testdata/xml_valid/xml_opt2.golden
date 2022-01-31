@@ -1,0 +1,18 @@
+<?xml version="1.0" encoding="utf-8" standalone="no"?>
+<pre:Vehicle xmlns:pre='urn:example-org:Transport' type='car'>
+	<seats> 4 </seats>
+	<colour> White </colour>
+	<!-- This is a comment about how to open ( 
+<![CDATA[ ) and 
+close ( ]]> ) CDATA sections -->
+	<!-- I really like having elements called <fred> in my 
+markup languages -->
+	<!-- Comments can contain all sorts of character literals
+including &, <, >, ' and". -->
+	<!-- If entities are used inside comments ( &lt; for 
+example ) they are not expanded. -->
+	<engine>
+		<petrol/>
+		<capacity units='cc'>1598</capacity>
+	</engine>
+</pre:Vehicle>

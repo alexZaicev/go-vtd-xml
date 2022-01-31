@@ -96,16 +96,19 @@ func NewInternalError(msg string, err error) *InternalError {
 // convert non-numeric string to a number.
 type ParseError struct {
 	baseError
-	Msg string
+	Msg        string
+	LineNumber string
 }
 
 // NewParseError constructs a new ParseError, wrapping the provided error.
 func NewParseError(msg string, lineNumber string, err error) *ParseError {
 	return &ParseError{
 		baseError: newBaseError(
-			fmt.Sprintf("a parse error occurred: %s %s", msg, lineNumber),
+			fmt.Sprintf("a parse error occurred: %s", msg),
 			err,
 		),
+		Msg:        msg,
+		LineNumber: lineNumber,
 	}
 }
 
@@ -123,6 +126,7 @@ func NewEncodingError(msg string) *EncodingError {
 			fmt.Sprintf("unknown character encoding: %s", msg),
 			nil,
 		),
+		Msg: msg,
 	}
 }
 
@@ -140,6 +144,7 @@ func NewEntityError(msg string) *EntityError {
 			fmt.Sprintf("unknown character encoding: %s", msg),
 			nil,
 		),
+		Msg: msg,
 	}
 }
 
@@ -156,5 +161,6 @@ func NewEOFError(msg string) *EOFError {
 			fmt.Sprintf("premature EOF reached: %s", msg),
 			nil,
 		),
+		Msg: msg,
 	}
 }

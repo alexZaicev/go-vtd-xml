@@ -23,12 +23,14 @@ type Url struct {
 }
 
 func (p *VtdParser) processAttrVal() (State, error) {
+	ch := p.currentChar
 	for {
 		if err := p.nextChar(); err != nil {
 			return StateInvalid, err
 		}
 		if p.xmlChar.IsValidChar(p.currentChar) && p.currentChar != '<' {
-			if p.currentChar == p.lastChar {
+			if p.currentChar == ch {
+				// break because attribute value finished
 				break
 			}
 			if p.currentChar == '&' {
@@ -63,18 +65,20 @@ func (p *VtdParser) processAttrVal() (State, error) {
 					return StateInvalid, err
 				}
 			}
-			if nsUrlType == NsUrl1998 {
+			if nsUrlType != DefaultNsUrl {
+				if nsUrlType == NsUrl1998 {
+					return StateInvalid, erroring.NewParseError(
+						fmt.Sprintf("namespace declation cannot point to %s", XMLNS1998),
+						p.fmtLine(),
+						nil,
+					)
+				}
 				return StateInvalid, erroring.NewParseError(
-					fmt.Sprintf("namespace declation cannot point to %s", XMLNS1998),
+					fmt.Sprintf("namespace declation cannot point to %s", XMLNS2000),
 					p.fmtLine(),
 					nil,
 				)
 			}
-			return StateInvalid, erroring.NewParseError(
-				fmt.Sprintf("namespace declation cannot point to %s", XMLNS2000),
-				p.fmtLine(),
-				nil,
-			)
 		}
 	}
 	if err := p.writeVtdWithLengthCheck(TokenAttrVal, erroring.AttrValueTooLong); err != nil {
@@ -140,7 +144,7 @@ func (p *VtdParser) identifyNsUrl() (NsUrlType, error) {
 		return DefaultNsUrl, nil
 	}
 
-	for i := 0; i < 18 && p.offset < g; i++ {
+	for i := 0; i < 18 && offset < g; i++ {
 		ch, err := p.getCharResolved(offset)
 		if err != nil {
 			return InvalidNsUrl, err
@@ -184,8 +188,8 @@ func (p *VtdParser) identifyNsUrl() (NsUrlType, error) {
 func (p *VtdParser) qualifyAttributes() error {
 	nsBuffer3Count := p.nsBuffer3.GetSize() - 1
 	for j := 0; j < p.prefixedAttCount; j++ {
-		preLen := (p.prefixedAttrNameSlice[j] & 0xFFFF) >> 16
-		preOs := p.prefixedAttrNameSlice[j] >> 32
+		preLen := int(int32((p.prefixedAttrNameSlice[j] & 0xFFFF0000) >> 16))
+		preOs := int(int32(p.prefixedAttrNameSlice[j] >> 32))
 
 		i := nsBuffer3Count
 		for ; i >= 0; i-- {
@@ -223,10 +227,10 @@ func (p *VtdParser) qualifyAttributes() error {
 
 func (p *VtdParser) checkQualifiedAttributeUniqueness() error {
 	for i := 0; i < p.prefixedAttCount; i++ {
-		preLen := (p.prefixedAttrNameSlice[i] & 0xFFFF) >> 16
-		postLen := (p.prefixedAttrNameSlice[i] & 0xFFFF) - preLen - p.increment
+		preLen := int(int32((p.prefixedAttrNameSlice[i] & 0xFFFF0000) >> 16))
+		postLen := int(int32(p.prefixedAttrNameSlice[i]&0xFFFF)) - preLen - p.increment
 
-		offset := (p.prefixedAttrNameSlice[i] >> 32) + preLen + p.increment
+		offset := int(int32(p.prefixedAttrNameSlice[i]>>32)) + preLen + p.increment
 
 		urlLen, err := p.nsBuffer2.Lower32At(p.prefixUrlSlice[i])
 		if err != nil {
@@ -239,10 +243,10 @@ func (p *VtdParser) checkQualifiedAttributeUniqueness() error {
 		urlA := Url{int(urlOffset), int(urlLen)}
 
 		for j := i + 1; j < p.prefixedAttCount; j++ {
-			preLen2 := (p.prefixedAttrNameSlice[j] & 0xFFFF) >> 16
-			postLen2 := (p.prefixedAttrNameSlice[j] & 0xFFFF) - preLen2 - p.increment
+			preLen2 := int(int32((p.prefixedAttrNameSlice[j] & 0xFFFF0000) >> 16))
+			postLen2 := int(int32(p.prefixedAttrNameSlice[j]&0xFFFF)) - preLen2 - p.increment
 
-			offset2 := (p.prefixedAttrNameSlice[j] >> 32) + preLen2 + p.increment
+			offset2 := int(int32(p.prefixedAttrNameSlice[j]>>32)) + preLen2 + p.increment
 
 			if postLen == postLen2 {
 				var k int
@@ -356,7 +360,7 @@ func (p *VtdParser) getCharResolved(offset int) (int64, error) {
 		}
 	case 'a':
 		{
-			ch2, err := p.reader.GetChar()
+			ch2, err := p.getChar()
 			if err != nil {
 				return 0, err
 			}

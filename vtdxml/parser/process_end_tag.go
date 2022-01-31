@@ -3,11 +3,11 @@ package parser
 import "github.com/alexZaicev/go-vtd-xml/vtdxml/erroring"
 
 func (p *VtdParser) processEndTag() (State, error) {
-	sOffset := int(p.tagStack[p.depth])
-	sLength := int(p.tagStack[p.depth] >> 32)
-
 	p.lastOffset = p.offset
-	p.offset = p.lastOffset + sLength
+	sOffset := int(int32(p.tagStack[p.depth]))
+	sLength := int(int32(p.tagStack[p.depth] >> 32))
+
+	p.setOffset(p.lastOffset + sLength)
 	if p.offset >= p.endOffset {
 		return StateInvalid, erroring.NewEOFError(erroring.XmlIncomplete)
 	}

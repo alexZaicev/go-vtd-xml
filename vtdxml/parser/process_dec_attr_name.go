@@ -24,7 +24,7 @@ const (
 )
 
 func (p *VtdParser) processDecAttrName() (State, error) {
-	if p.currentChar == uint32(version[0]) && p.reader.SkipCharSeq(version[1:]) {
+	if p.currentChar == uint32(version[0]) && p.skipCharSeq(version[1:]) {
 		if err := p.nextCharAfterWs(); err != nil {
 			return StateInvalid, err
 		}
@@ -51,7 +51,7 @@ func (p *VtdParser) processDecAttrName() (State, error) {
 	}
 	p.lastOffset = p.offset
 	// support 1.0 & 1.1 versions
-	if p.reader.SkipCharSeq("1.") && (p.reader.SkipChar('0') || p.reader.SkipChar('1')) {
+	if p.skipCharSeq("1.") && (p.skipChar('0') || p.skipChar('1')) {
 		if p.singleByteEncoding {
 			if err := p.writeVtd(TokenDecAttrVal, p.lastOffset, 3, p.depth); err != nil {
 				return StateInvalid, err
@@ -62,9 +62,9 @@ func (p *VtdParser) processDecAttrName() (State, error) {
 			}
 		}
 	} else {
-		return StateInvalid, erroring.NewParseError("invalid version detected (supported 1.0 or 1.1", p.fmtLine(), nil)
+		return StateInvalid, erroring.NewParseError("invalid version detected (supported 1.0 or 1.1)", p.fmtLine(), nil)
 	}
-	if p.reader.SkipChar(p.currentChar) {
+	if !p.skipChar(p.currentChar) {
 		return StateInvalid, erroring.NewParseError("version not terminated properly", p.fmtLine(), nil)
 	}
 	if err := p.nextChar(); err != nil {
@@ -77,24 +77,23 @@ func (p *VtdParser) processDecAttrName() (State, error) {
 		}
 		p.lastOffset = p.offset - p.increment
 		if p.currentChar == uint32(encoding[0]) {
-			if !p.reader.SkipCharSeq(encoding[1:]) {
-				return StateInvalid, erroring.NewParseError(erroring.InvalidChar, p.fmtLine(), nil)
+			if !p.skipCharSeq(encoding[1:]) {
+				return StateInvalid, erroring.NewParseError("declaration should be encoding", p.fmtLine(), nil)
 			}
 			if err := p.processDecEncodingAttr(); err != nil {
 				return StateInvalid, err
 			}
 		}
 		if p.currentChar == uint32(standalone[0]) {
-			if !p.reader.SkipCharSeq(standalone[1:]) {
-				return StateInvalid, erroring.NewParseError(erroring.InvalidChar, p.fmtLine(), nil)
+			if !p.skipCharSeq(standalone[1:]) {
+				return StateInvalid, erroring.NewParseError("declaration should be standalone", p.fmtLine(), nil)
 			}
 			if err := p.processDecStandaloneAttr(); err != nil {
 				return StateInvalid, err
 			}
 		}
 	}
-
-	if p.currentChar == '?' && p.reader.SkipChar('>') {
+	if p.currentChar == '?' && p.skipChar('>') {
 		p.lastOffset = p.offset
 		if err := p.nextCharAfterWs(); err != nil {
 			return StateInvalid, err
@@ -149,7 +148,7 @@ func (p *VtdParser) processDecEncodingAttr() error {
 			return err
 		}
 	case 'u', 'U':
-		if p.reader.SkipChar(uint32(usAscii[1])) {
+		if p.skipChar(uint32(usAscii[1])) {
 			if err := p.checkUsAsciiEncoding(); err != nil {
 				return err
 			}
@@ -201,7 +200,7 @@ func (p *VtdParser) processDecStandaloneAttr() error {
 	if p.currentChar != '\'' && p.currentChar != '"' {
 		return erroring.NewParseError("invalid char to start attribute name", p.fmtLine(), nil)
 	}
-	if p.reader.SkipCharSeq("yes") {
+	if p.skipCharSeq("yes") {
 		if p.singleByteEncoding {
 			if err := p.writeVtd(TokenDecAttrVal, p.lastOffset, 3, p.depth); err != nil {
 				return err
@@ -211,7 +210,7 @@ func (p *VtdParser) processDecStandaloneAttr() error {
 				return err
 			}
 		}
-	} else if p.reader.SkipCharSeq("no") {
+	} else if p.skipCharSeq("no") {
 		if p.singleByteEncoding {
 			if err := p.writeVtd(TokenDecAttrVal, p.lastOffset, 2, p.depth); err != nil {
 				return err
@@ -222,7 +221,7 @@ func (p *VtdParser) processDecStandaloneAttr() error {
 			}
 		}
 	} else {
-		return erroring.NewParseError("invalid value for attribute standalone (valid options are yes or no",
+		return erroring.NewParseError("invalid value for attribute standalone (valid options are yes or no)",
 			p.fmtLine(), nil)
 	}
 	if err := p.nextChar(); err != nil {
@@ -231,11 +230,14 @@ func (p *VtdParser) processDecStandaloneAttr() error {
 	if p.currentChar != '\'' && p.currentChar != '"' {
 		return erroring.NewParseError("invalid char to start attribute name", p.fmtLine(), nil)
 	}
+	if err := p.nextCharAfterWs(); err != nil {
+		return err
+	}
 	return nil
 }
 
 func (p *VtdParser) checkAsciiEncoding() error {
-	if !p.reader.SkipCharSeq(ascii[1:]) && !p.reader.SkipCharSeq(strings.ToUpper(ascii[1:])) {
+	if !p.skipCharSeq(ascii[1:]) && !p.skipCharSeq(strings.ToUpper(ascii[1:])) {
 		return erroring.NewParseError("invalid document encoding", p.fmtLine(), nil)
 	}
 	if p.encoding < FormatUtf16BE || p.encoding == FormatUtf16LE || p.mustUtf8 {
@@ -254,7 +256,7 @@ func (p *VtdParser) checkAsciiEncoding() error {
 }
 
 func (p *VtdParser) checkUsAsciiEncoding() error {
-	if !p.reader.SkipCharSeq(usAscii[2:]) && !p.reader.SkipCharSeq(strings.ToUpper(usAscii[2:])) {
+	if !p.skipCharSeq(usAscii[2:]) && !p.skipCharSeq(strings.ToUpper(usAscii[2:])) {
 		return erroring.NewParseError("invalid document encoding", p.fmtLine(), nil)
 	}
 	if p.encoding < FormatUtf16BE || p.encoding == FormatUtf16LE || p.mustUtf8 {
@@ -273,7 +275,7 @@ func (p *VtdParser) checkUsAsciiEncoding() error {
 }
 
 func (p *VtdParser) checkIsoEncoding() error {
-	if !p.reader.SkipCharSeq(iso8859[1:]) && !p.reader.SkipCharSeq(strings.ToUpper(iso8859[1:])) {
+	if !p.skipCharSeq(iso8859[1:]) && !p.skipCharSeq(strings.ToUpper(iso8859[1:])) {
 		return erroring.NewParseError("invalid document encoding", p.fmtLine(), nil)
 	}
 	if p.encoding < FormatUtf16BE || p.encoding == FormatUtf16LE || p.mustUtf8 {
@@ -290,8 +292,8 @@ func (p *VtdParser) checkIsoEncoding() error {
 }
 
 func (p *VtdParser) checkUtfEncoding() error {
-	if p.reader.SkipCharSeq(utf8[1:4]) {
-		if p.reader.SkipChar(uint32(utf8[4])) {
+	if p.skipCharSeqIgnoreCase(utf8[1:4]) {
+		if p.skipChar(uint32(utf8[4])) {
 			// resolve UTF-8
 			if !p.singleByteEncoding {
 				return erroring.NewParseError("cannot switch document encoding to UTF-8", p.fmtLine(), nil)
@@ -299,8 +301,8 @@ func (p *VtdParser) checkUtfEncoding() error {
 			if err := p.writeVtd(TokenDecAttrVal, p.lastOffset, 5, p.depth); err != nil {
 				return err
 			}
-		} else if p.reader.SkipCharSeq(utf16[4:6]) {
-			if p.reader.SkipCharSeq(utf16LE[6:]) {
+		} else if p.skipCharSeqIgnoreCase(utf16[4:6]) {
+			if p.skipCharSeqIgnoreCase(utf16LE[6:]) {
 				// resolve UTF-16LE
 				if p.encoding == FormatUtf16LE {
 					// r, err := reader.NewUtf16LeReader(p.xmlDoc, p.offset, p.endOffset)
@@ -314,7 +316,7 @@ func (p *VtdParser) checkUtfEncoding() error {
 				} else {
 					return erroring.NewParseError("cannot switch document encoding to UTF-16LE", p.fmtLine(), nil)
 				}
-			} else if p.reader.SkipCharSeq(utf16BE[6:]) {
+			} else if p.skipCharSeqIgnoreCase(utf16BE[6:]) {
 				// resolve UTF-16BE
 				if p.encoding == FormatUtf16BE {
 					// r, err := reader.NewUtf16BeReader(p.xmlDoc, p.offset, p.endOffset)
@@ -352,7 +354,7 @@ func (p *VtdParser) checkUtfEncoding() error {
 }
 
 func (p *VtdParser) checkCpEncoding() error {
-	if !p.reader.SkipCharSeq(cp125[1:]) && !p.reader.SkipCharSeq(strings.ToUpper(cp125[1:])) {
+	if !p.skipCharSeq(cp125[1:]) && !p.skipCharSeq(strings.ToUpper(cp125[1:])) {
 		return erroring.NewParseError("invalid document encoding", p.fmtLine(), nil)
 	}
 	if p.encoding > FormatUtf16LE || p.mustUtf8 {
@@ -368,7 +370,7 @@ func (p *VtdParser) checkCpEncoding() error {
 }
 
 func (p *VtdParser) checkWindowsEncoding() error {
-	if !p.reader.SkipCharSeq(windows[1:]) && !p.reader.SkipCharSeq(strings.ToUpper(windows[1:])) {
+	if !p.skipCharSeq(windows[1:]) && !p.skipCharSeq(strings.ToUpper(windows[1:])) {
 		return erroring.NewParseError("invalid document encoding", p.fmtLine(), nil)
 	}
 	if p.encoding > FormatUtf16LE || p.mustUtf8 {
@@ -384,63 +386,63 @@ func (p *VtdParser) checkWindowsEncoding() error {
 }
 
 func (p *VtdParser) setWinEncoding() error {
-	// if p.reader.SkipChar('0') {
+	// if p.skipChar('0') {
 	// 	p.encoding = FormatWin1250
 	// 	r, err := reader.NewWin1250(p.xmlDoc, p.offset, p.endOffset)
 	// 	if err != nil {
 	// 		return err
 	// 	}
 	// 	p.reader = &r
-	// } else if p.reader.SkipChar('1') {
+	// } else if p.skipChar('1') {
 	// 	p.encoding = FormatWin1251
 	// 	r, err := reader.NewWin1251(p.xmlDoc, p.offset, p.endOffset)
 	// 	if err != nil {
 	// 		return err
 	// 	}
 	// 	p.reader = &r
-	// } else if p.reader.SkipChar('2') {
+	// } else if p.skipChar('2') {
 	// 	p.encoding = FormatWin1252
 	// 	r, err := reader.NewWin1252(p.xmlDoc, p.offset, p.endOffset)
 	// 	if err != nil {
 	// 		return err
 	// 	}
 	// 	p.reader = &r
-	// } else if p.reader.SkipChar('3') {
+	// } else if p.skipChar('3') {
 	// 	p.encoding = FormatWin1253
 	// 	r, err := reader.NewWin1253(p.xmlDoc, p.offset, p.endOffset)
 	// 	if err != nil {
 	// 		return err
 	// 	}
 	// 	p.reader = &r
-	// } else if p.reader.SkipChar('4') {
+	// } else if p.skipChar('4') {
 	// 	p.encoding = FormatWin1254
 	// 	r, err := reader.NewWin1254(p.xmlDoc, p.offset, p.endOffset)
 	// 	if err != nil {
 	// 		return err
 	// 	}
 	// 	p.reader = &r
-	// } else if p.reader.SkipChar('5') {
+	// } else if p.skipChar('5') {
 	// 	p.encoding = FormatWin1255
 	// 	r, err := reader.NewWin1255(p.xmlDoc, p.offset, p.endOffset)
 	// 	if err != nil {
 	// 		return err
 	// 	}
 	// 	p.reader = &r
-	// } else if p.reader.SkipChar('6') {
+	// } else if p.skipChar('6') {
 	// 	p.encoding = FormatWin1256
 	// 	r, err := reader.NewWin1256(p.xmlDoc, p.offset, p.endOffset)
 	// 	if err != nil {
 	// 		return err
 	// 	}
 	// 	p.reader = &r
-	// } else if p.reader.SkipChar('7') {
+	// } else if p.skipChar('7') {
 	// 	p.encoding = FormatWin1257
 	// 	r, err := reader.NewWin1257(p.xmlDoc, p.offset, p.endOffset)
 	// 	if err != nil {
 	// 		return err
 	// 	}
 	// 	p.reader = &r
-	// } else if p.reader.SkipChar('8') {
+	// } else if p.skipChar('8') {
 	// 	p.encoding = FormatWin1258
 	// 	r, err := reader.NewWin1258(p.xmlDoc, p.offset, p.endOffset)
 	// 	if err != nil {

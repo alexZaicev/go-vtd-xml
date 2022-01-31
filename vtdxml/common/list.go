@@ -15,8 +15,8 @@ type ArrayList struct {
 	size int
 }
 
-func NewArrayList() ArrayList {
-	return ArrayList{
+func NewArrayList() *ArrayList {
+	return &ArrayList{
 		oa: [][]interface{}{},
 	}
 }

@@ -20,7 +20,7 @@ func Test_NewUniByteBuffer_Success(t *testing.T) {
 func Test_NewUniByteBuffer_InvalidArguments(t *testing.T) {
 	buffer, err := NewUniByteBuffer(nil)
 	assert.EqualError(t, err, "invalid argument buffer: cannot be nil")
-	assert.NotNil(t, buffer)
+	assert.Nil(t, buffer)
 }
 
 func Test_UniByteBuffer_ByteAt_Success(t *testing.T) {
@@ -145,7 +145,7 @@ func Test_UniByteBuffer_GetByteSlice_InvalidArgument(t *testing.T) {
 	}
 }
 
-func getInitializedBuffer(t *testing.T) UniByteBuffer {
+func getInitializedBuffer(t *testing.T) *UniByteBuffer {
 	bytes := make([]byte, 1024)
 	bytes[0] = 15
 	bytes[1] = 23

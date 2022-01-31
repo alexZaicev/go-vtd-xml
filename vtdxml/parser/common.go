@@ -2,6 +2,7 @@ package parser
 
 import (
 	"fmt"
+	"strings"
 
 	"github.com/alexZaicev/go-vtd-xml/vtdxml/erroring"
 )
@@ -94,10 +95,65 @@ const (
 	XMLNS2000 = "http://www.w3.org/2000/xmlns"
 )
 
+// setOffset function set custom offset to parser byte reader and sets
+// parsers current and last offsets
+func (p *VtdParser) setOffset(offset int) {
+	p.reader.SetOffset(offset)
+	p.lastOffset = p.offset
+	p.offset = offset
+}
+
+func (p *VtdParser) getChar() (uint32, error) {
+	ch, err := p.reader.GetChar()
+	if err != nil {
+		return 0, err
+	}
+	p.offset = p.reader.GetOffset()
+	return ch, nil
+}
+
+func (p *VtdParser) skipChar(ch uint32) bool {
+	skipped := p.reader.SkipChar(ch)
+	p.offset = p.reader.GetOffset()
+	return skipped
+}
+
+func (p *VtdParser) skipCharSeq(seq string) bool {
+	skipped := p.reader.SkipCharSeq(seq)
+	p.offset = p.reader.GetOffset()
+	return skipped
+}
+
+// skipCharSeqIgnoreCase function skips sequence of characters ignoring
+// case sensitivity
+func (p *VtdParser) skipCharSeqIgnoreCase(seq string) bool {
+	// compose a 2D slice containing a pair of lower and upper
+	// case characters
+	var seqRange [][]uint32
+	for i := 0; i < len(seq); i++ {
+		sCh := seq[i : i+1]
+		seqRange = append(seqRange, []uint32{
+			uint32(sCh[0]),
+			uint32(strings.ToUpper(sCh)[0]),
+		})
+	}
+
+	// walk through the 2D slice and skip characters. If skipping
+	// fails return false
+	var skipped bool
+	for _, chars := range seqRange {
+		skipped = p.skipChar(chars[0]) || p.skipChar(chars[1])
+		if !skipped {
+			return false
+		}
+	}
+	return true
+}
+
 // nextCharAfterWs function reads next character and updates current
 // and last characters
 func (p *VtdParser) nextChar() error {
-	if ch, err := p.reader.GetChar(); err != nil {
+	if ch, err := p.getChar(); err != nil {
 		return err
 	} else {
 		p.lastChar = p.currentChar
@@ -370,16 +426,6 @@ func (p *VtdParser) decideEncoding() error {
 		} else {
 			return erroring.NewEncodingError("not UTF-16BE")
 		}
-	} else if int32(p.xmlDoc[p.offset]) == 0x3c {
-		if int32(p.xmlDoc[p.offset+1]) == 0x3c &&
-			int32(p.xmlDoc[p.offset+2]) == 0 &&
-			int32(p.xmlDoc[p.offset+3]) == 0x3f {
-			p.encoding = FormatUtf16LE
-			p.increment = 2
-			// g.reader = reader.NewUtf16LeReader()
-		} else {
-			return erroring.NewEncodingError("not UTF-16LE")
-		}
 	} else if int32(p.xmlDoc[p.offset]) == -17 {
 		if int32(p.xmlDoc[p.offset+1]) == -69 &&
 			int32(p.xmlDoc[p.offset+2]) == -65 {
@@ -388,6 +434,15 @@ func (p *VtdParser) decideEncoding() error {
 		} else {
 			return erroring.NewEncodingError("not UTF-8")
 		}
+	} else if int32(p.xmlDoc[p.offset]) == 0x3c {
+		if int32(p.xmlDoc[p.offset+1]) == 0 &&
+			int32(p.xmlDoc[p.offset+2]) == 0x3f &&
+			int32(p.xmlDoc[p.offset+3]) == 0 {
+			p.encoding = FormatUtf16LE
+			p.increment = 2
+			// g.reader = reader.NewUtf16LeReader()
+		}
+		// no need to return error if failed the condition
 	}
 
 	if p.encoding < FormatUtf16BE {
@@ -489,8 +544,8 @@ func (p *VtdParser) checkXmlnsPrefix(offset, length int, checkLength bool) bool 
 // (1) current element has no prefix, then look for XMLNS;
 // (2) current element has prefix, then look for XMLNS:<SOMETHING>
 func (p *VtdParser) qualifyElement() error {
-	preLen := int((p.currentElementRecord & 0xFFFF) >> 48)
-	preOs := int(p.currentElementRecord)
+	preLen := int(int32((p.currentElementRecord & 0xFFFF00000000000) >> 48))
+	preOs := int(int32(p.currentElementRecord))
 	for i := p.nsBuffer3.GetSize() - 1; i >= 0; i-- {
 		upVal, err := p.nsBuffer3.Upper32At(i)
 		if err != nil {
@@ -518,7 +573,7 @@ func (p *VtdParser) qualifyElement() error {
 		return nil
 	}
 	return erroring.NewParseError("namespace qualification exception: element not qualified",
-		p.fmtCustomLine(int(p.currentElementRecord)), nil)
+		p.fmtCustomLine(preOs), nil)
 }
 
 // recordWhiteSpace function record whitespaces into VTD text buffer that are
@@ -554,9 +609,9 @@ func (p *VtdParser) handleOtherTextChar(ch uint32) error {
 	case ']':
 		{
 			// skip all ] chars
-			for p.reader.SkipChar(']') {
+			for p.skipChar(']') {
 			}
-			if p.reader.SkipChar('>') {
+			if p.skipChar('>') {
 				return erroring.NewParseError("]]> sequence in text content", p.fmtLine(), nil)
 			}
 			break
@@ -574,7 +629,7 @@ func (p *VtdParser) entityIdentifier() (uint32, error) {
 
 	checkSeq := func(seq string) error {
 		for _, seqCh := range seq {
-			ch, err := p.reader.GetChar()
+			ch, err := p.getChar()
 			if err != nil {
 				return err
 			}
@@ -585,7 +640,7 @@ func (p *VtdParser) entityIdentifier() (uint32, error) {
 		return nil
 	}
 
-	ch, err := p.reader.GetChar()
+	ch, err := p.getChar()
 	if err != nil {
 		return 0, err
 	}
@@ -593,13 +648,13 @@ func (p *VtdParser) entityIdentifier() (uint32, error) {
 	case '#':
 		{
 			var value uint32
-			ch, err = p.reader.GetChar()
+			ch, err = p.getChar()
 			if err != nil {
 				return 0, err
 			}
 			if ch == 'x' {
 				for {
-					ch, err = p.reader.GetChar()
+					ch, err = p.getChar()
 					if err != nil {
 						return 0, err
 					}
@@ -624,7 +679,7 @@ func (p *VtdParser) entityIdentifier() (uint32, error) {
 					} else {
 						return 0, erroring.NewEntityError("illegal char following &#x")
 					}
-					ch, err = p.reader.GetChar()
+					ch, err = p.getChar()
 					if err != nil {
 						return 0, err
 					}
@@ -638,7 +693,7 @@ func (p *VtdParser) entityIdentifier() (uint32, error) {
 	case 'a':
 		{
 			// checks that the sequence matcher &amp;
-			ch2, err := p.reader.GetChar()
+			ch2, err := p.getChar()
 			if err != nil {
 				return 0, err
 			}

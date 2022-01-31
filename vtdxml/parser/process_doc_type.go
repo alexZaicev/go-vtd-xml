@@ -5,7 +5,7 @@ import "github.com/alexZaicev/go-vtd-xml/vtdxml/erroring"
 func (p *VtdParser) processDocType() (State, error) {
 	z := 1
 	for {
-		ch, err := p.reader.GetChar()
+		ch, err := p.getChar()
 		if err != nil {
 			return StateInvalid, err
 		}

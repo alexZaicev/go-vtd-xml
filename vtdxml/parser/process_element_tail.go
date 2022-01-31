@@ -12,7 +12,7 @@ func (p *VtdParser) processElementTail() (State, error) {
 					return StateInvalid, err
 				}
 			}
-			if p.reader.SkipChar('/') {
+			if p.skipChar('/') {
 				if p.helper {
 					p.length1 = p.offset - p.lastOffset - (p.increment << 1)
 					if p.singleByteEncoding {

@@ -19,7 +19,7 @@ func NewUtf8Reader(xmlDoc []byte, offset, endOffset int) (Utf8Reader, error) {
 	if offset < 0 {
 		return Utf8Reader{}, erroring.NewInvalidArgumentError("offset", erroring.IndexOutOfRange, nil)
 	}
-	if endOffset < 0 || endOffset >= len(xmlDoc) {
+	if endOffset < 0 || endOffset > len(xmlDoc) {
 		return Utf8Reader{}, erroring.NewInvalidArgumentError("endOffset", erroring.IndexOutOfRange, nil)
 	}
 	return Utf8Reader{
@@ -69,6 +69,14 @@ func (r *Utf8Reader) SkipCharSeq(seq string) bool {
 
 func (r *Utf8Reader) Decode(offset int32) (uint32, error) {
 	return uint32(r.xmlDoc[offset]), nil
+}
+
+func (r *Utf8Reader) GetOffset() int {
+	return r.offset
+}
+
+func (r *Utf8Reader) SetOffset(offset int) {
+	r.offset = offset
 }
 
 // isUTF8 function to validate if a character is a valid ASCII character

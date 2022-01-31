@@ -9,7 +9,7 @@ import (
 // validateSeq function to validate string sequence directly from the reader.Reader
 func (p *VtdParser) validateSeq(seq string) error {
 	for _, seqChar := range seq {
-		c, err := p.reader.GetChar()
+		c, err := p.getChar()
 		if err != nil {
 			return err
 		}
@@ -46,9 +46,9 @@ func (p *VtdParser) getNextProcessStateFromChar(ch uint32) (State, error) {
 	}
 	if ch == ']' {
 		// skip all ] chars
-		for p.reader.SkipChar(']') {
+		for p.skipChar(']') {
 		}
-		if p.reader.SkipChar('>') {
+		if p.skipChar('>') {
 			return StateInvalid, erroring.NewParseError("]]> sequence in text content", p.fmtLine(), nil)
 		}
 		return StateText, nil

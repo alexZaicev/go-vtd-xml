@@ -1,0 +1,7 @@
+<Document xmlns="urn:swift:xsd:mirs.095.001.01">
+	<ActvtnDeactvtn>
+		<MsgId>asdasd</MsgId>
+		<DtAndTm>2021-08-30T03:04:06.000+01:00</DtAndTm>
+		<ActvtnDeactvtn>DEAC</ActvtnDeactvtn>
+	</ActvtnDeactvtn>
+</Document>

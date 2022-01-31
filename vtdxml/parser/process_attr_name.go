@@ -8,14 +8,14 @@ import (
 
 func (p *VtdParser) processAttrName() (State, error) {
 	if p.currentChar == 'x' {
-		if p.reader.SkipCharSeq("mlns") {
+		if p.skipCharSeq("mlns") {
 			if err := p.nextChar(); err != nil {
 				return StateInvalid, err
 			}
 
 			if p.currentChar == '=' || p.xmlChar.IsSpaceChar(p.currentChar) {
 				p.defaultNs, p.isNs = true, true
-			} else {
+			} else if p.currentChar == ':' {
 				p.defaultNs, p.isNs = false, true
 			}
 		}
@@ -62,7 +62,7 @@ func (p *VtdParser) processAttrName() (State, error) {
 	if p.isNs {
 		tokenType = TokenAttrNs
 		errMsg = erroring.AttrNsPrefixQnameTooLong
-		if p.nsAware && p.length2 != 0 && p.isXml {
+		if p.nsAware && p.length2 != 0 && !p.isXml {
 			val := int64((p.length2<<16|p.length1)<<32 | p.lastOffset)
 			if err := p.nsBuffer3.Append(val); err != nil {
 				return StateInvalid, err
@@ -107,11 +107,12 @@ func (p *VtdParser) processAttrName() (State, error) {
 
 func (p *VtdParser) checkAttrUniqueness() error {
 	var unique, uniqual bool
+	unique = true
 	for i := 0; i < p.attrCount; i++ {
-		unique = false
-		prevLen := p.attrNameSlice[i]
+		uniqual = false
+		prevLen := int(int32(p.attrNameSlice[i]))
 		if p.length1 == prevLen {
-			prevOffset := p.attrNameSlice[i] >> 32
+			prevOffset := int(int32(p.attrNameSlice[i] >> 32))
 			for j := 0; j < prevLen; j++ {
 				if p.xmlDoc[prevOffset+j] != p.xmlDoc[p.lastOffset+j] {
 					uniqual = true
@@ -134,7 +135,7 @@ func (p *VtdParser) checkAttrUniqueness() error {
 		if (p.increment == 1 && p.length2 == 3 && isXml) || (p.increment == 2 && p.length2 == 6 && isXml) {
 			return nil
 		}
-		p.prefixedAttrNameSlice[p.prefixedAttCount] = (p.lastOffset << 32) | (p.length2 << 16) | p.length1
+		p.prefixedAttrNameSlice[p.prefixedAttCount] = int64((p.lastOffset << 32) | (p.length2 << 16) | p.length1)
 		p.prefixedAttCount++
 	}
 	return nil

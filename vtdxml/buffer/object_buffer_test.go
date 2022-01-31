@@ -43,7 +43,7 @@ func Test_NewFastObjectBuffer_InvalidArgument(t *testing.T) {
 
 	buffer, err := NewFastIntBuffer(WithFastIntBufferPageSize(size))
 	assert.EqualError(t, err, "invalid argument size: invalid buffer page size")
-	assert.NotNil(t, buffer)
+	assert.Nil(t, buffer)
 }
 
 func Test_FastObjectBuffer_ObjectAt_Success(t *testing.T) {
@@ -176,7 +176,7 @@ func Test_FastObjectBuffer_Clear_Success(t *testing.T) {
 	assert.Equal(t, 0, buffer.GetSize())
 }
 
-func getInitializedFastObjectBuffer(t *testing.T) FastObjectBuffer {
+func getInitializedFastObjectBuffer(t *testing.T) *FastObjectBuffer {
 	buffer, err := NewFastObjectBuffer(WithFastObjectBufferPageSize(defaultLongSize))
 	assert.Nil(t, err)
 	assert.NotNil(t, buffer)

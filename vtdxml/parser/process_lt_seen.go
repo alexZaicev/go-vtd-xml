@@ -3,15 +3,15 @@ package parser
 import "github.com/alexZaicev/go-vtd-xml/vtdxml/erroring"
 
 func (p *VtdParser) processLtSeen() (State, error) {
-	ch, err := p.reader.GetChar()
-	if err != nil {
+	p.lastOffset = p.offset
+	if err := p.nextChar(); err != nil {
 		return StateInvalid, erroring.NewInternalError("failed to parse LT seen", err)
 	}
-	if p.xmlChar.IsNameStartChar(ch) {
+	if p.xmlChar.IsNameStartChar(p.currentChar) {
 		p.depth++
 		return StateTagStart, nil
 	} else {
-		switch ch {
+		switch p.currentChar {
 		case '/':
 			return StateTagEnd, nil
 		case '!':
@@ -25,14 +25,14 @@ func (p *VtdParser) processLtSeen() (State, error) {
 }
 
 func (p *VtdParser) processExSeen() (State, error) {
-	ch, err := p.reader.GetChar()
+	ch, err := p.getChar()
 	if err != nil {
 		return StateInvalid, erroring.NewInternalError("failed to parse EX seen", err)
 	}
 	switch ch {
 	case '-':
 		{
-			if p.reader.SkipChar('-') {
+			if p.skipChar('-') {
 				p.lastOffset = p.offset
 				return StateStartComment, nil
 			} else {
@@ -59,15 +59,15 @@ func (p *VtdParser) processExSeen() (State, error) {
 
 func (p *VtdParser) processQmSeen() (State, error) {
 	p.lastOffset = p.offset
-	ch, err := p.reader.GetChar()
+	ch, err := p.getChar()
 	if err != nil {
 		return StateInvalid, erroring.NewInternalError("failed to parse QM seen", err)
 	}
 	if p.xmlChar.IsNameStartChar(ch) {
 		if (ch == 'x' || ch == 'X') &&
-			(p.reader.SkipChar('m') || p.reader.SkipChar('M')) &&
-			(p.reader.SkipChar('l') || p.reader.SkipChar('L')) {
-			ch, err = p.reader.GetChar()
+			(p.skipChar('m') || p.skipChar('M')) &&
+			(p.skipChar('l') || p.skipChar('L')) {
+			ch, err = p.getChar()
 			if err != nil {
 				return StateInvalid, err
 			}

@@ -13,11 +13,11 @@ type UniByteBuffer struct {
 	buffer []byte
 }
 
-func NewUniByteBuffer(buffer []byte) (UniByteBuffer, error) {
+func NewUniByteBuffer(buffer []byte) (*UniByteBuffer, error) {
 	if buffer == nil {
-		return UniByteBuffer{}, erroring.NewInvalidArgumentError("buffer", erroring.CannotBeNil, nil)
+		return nil, erroring.NewInvalidArgumentError("buffer", erroring.CannotBeNil, nil)
 	}
-	return UniByteBuffer{
+	return &UniByteBuffer{
 		buffer: buffer,
 	}, nil
 }

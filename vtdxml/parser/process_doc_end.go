@@ -7,10 +7,10 @@ func (p *VtdParser) processDocEnd() (State, error) {
 		return StateInvalid, err
 	}
 	if p.currentChar == '<' {
-		if p.reader.SkipChar('?') {
+		if p.skipChar('?') {
 			p.lastOffset = p.offset
 			return StatePiEnd, nil
-		} else if p.reader.SkipCharSeq("!--") {
+		} else if p.skipCharSeq("!--") {
 			p.lastOffset = p.offset
 			return StateEndComment, nil
 		}

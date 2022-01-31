@@ -20,7 +20,7 @@ type IntBuffer interface {
 }
 
 type FastIntBuffer struct {
-	buffer   common.ArrayList
+	buffer   *common.ArrayList
 	capacity int
 	size     int
 	exp      int
@@ -38,8 +38,8 @@ func WithFastIntBufferPageSize(size int) FastIntBufferOption {
 	}
 }
 
-func NewFastIntBuffer(opts ...FastIntBufferOption) (FastIntBuffer, error) {
-	b := FastIntBuffer{
+func NewFastIntBuffer(opts ...FastIntBufferOption) (*FastIntBuffer, error) {
+	b := &FastIntBuffer{
 		capacity: 0,
 		size:     0,
 		pageSize: DefaultIntPageSize,
@@ -49,11 +49,11 @@ func NewFastIntBuffer(opts ...FastIntBufferOption) (FastIntBuffer, error) {
 	}
 
 	for _, opt := range opts {
-		opt(&b)
+		opt(b)
 	}
 
 	if b.pageSize == 0 || b.r < 0 {
-		return FastIntBuffer{}, erroring.NewInvalidArgumentError("size", erroring.InvalidBufferPageSize, nil)
+		return nil, erroring.NewInvalidArgumentError("size", erroring.InvalidBufferPageSize, nil)
 	}
 
 	return b, nil
@@ -132,6 +132,7 @@ func (b *FastIntBuffer) Append(value int32) error {
 			return err
 		}
 		bufferSlice = append(bufferSlice, value)
+		b.size++
 		return b.buffer.Set(pageNum, bufferSlice)
 	} else {
 		b.size++

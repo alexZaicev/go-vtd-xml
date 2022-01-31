@@ -10,7 +10,7 @@ func (p *VtdParser) processEndComment() (State, error) {
 		if !p.xmlChar.IsValidChar(p.currentChar) {
 			return StateInvalid, erroring.NewParseError(erroring.InvalidChar, p.fmtLine(), nil)
 		}
-		if p.currentChar == '-' && p.reader.SkipChar('-') {
+		if p.currentChar == '-' && p.skipChar('-') {
 			p.length1 = p.offset - p.lastOffset - (p.increment << 1)
 			break
 		}

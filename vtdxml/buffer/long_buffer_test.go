@@ -42,7 +42,7 @@ func Test_NewFastLongBuffer_InvalidArgument(t *testing.T) {
 
 	buffer, err := NewFastIntBuffer(WithFastIntBufferPageSize(size))
 	assert.EqualError(t, err, "invalid argument size: invalid buffer page size")
-	assert.NotNil(t, buffer)
+	assert.Nil(t, buffer)
 }
 
 func Test_FastLongBuffer_LongAt_Success(t *testing.T) {
@@ -313,7 +313,7 @@ func Test_FastLongBuffer_Upper32At_InvalidArgument(t *testing.T) {
 	}
 }
 
-func getInitializedFastLongBuffer(t *testing.T) FastLongBuffer {
+func getInitializedFastLongBuffer(t *testing.T) *FastLongBuffer {
 	buffer, err := NewFastLongBuffer(WithFastLongBufferPageSize(defaultLongSize))
 	assert.Nil(t, err)
 	assert.NotNil(t, buffer)
@@ -323,8 +323,7 @@ func getInitializedFastLongBuffer(t *testing.T) FastLongBuffer {
 		assert.Nil(t, err)
 	}
 
-	// we expect our buffer to have exactly 1 page
-	assert.Equal(t, 1, buffer.GetSize())
+	assert.Equal(t, defaultLongBufferSize, buffer.GetSize())
 
 	longSlice, err := buffer.ToLongArray()
 	assert.Nil(t, err)

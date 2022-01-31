@@ -10,7 +10,8 @@ func (p *VtdParser) processPiEnd() (State, error) {
 		return StateInvalid, erroring.NewParseError("invalid char in PI target", p.fmtLine(), nil)
 	}
 	if (p.currentChar == 'x' || p.currentChar == 'X') &&
-		(p.reader.SkipCharSeq("ml") || p.reader.SkipCharSeq("ML")) {
+		(p.skipChar('m') || p.skipChar('M')) &&
+		(p.skipChar('l') || p.skipChar('L')) {
 		if err := p.nextChar(); err != nil {
 			return StateInvalid, err
 		}
@@ -40,7 +41,7 @@ func (p *VtdParser) processPiEnd() (State, error) {
 			if !p.xmlChar.IsValidChar(p.currentChar) {
 				return StateInvalid, erroring.NewParseError("invalid char in PI value", p.fmtLine(), nil)
 			}
-			if p.currentChar == '?' && p.reader.SkipChar('>') {
+			if p.currentChar == '?' && p.skipChar('>') {
 				break
 			}
 			if err := p.nextChar(); err != nil {
@@ -61,7 +62,7 @@ func (p *VtdParser) processPiEnd() (State, error) {
 				return StateInvalid, err
 			}
 		}
-		if p.currentChar != '?' || p.reader.SkipChar('>') {
+		if p.currentChar != '?' || p.skipChar('>') {
 			return StateInvalid, erroring.NewParseError("invalid termination sequence", p.fmtLine(), nil)
 		}
 	}

@@ -19,7 +19,7 @@ type ObjectBuffer interface {
 }
 
 type FastObjectBuffer struct {
-	buffer   common.ArrayList
+	buffer   *common.ArrayList
 	capacity int
 	size     int
 	exp      int
@@ -35,8 +35,8 @@ func WithFastObjectBufferPageSize(size int) FastObjectBufferOption {
 	}
 }
 
-func NewFastObjectBuffer(opts ...FastObjectBufferOption) (FastObjectBuffer, error) {
-	b := FastObjectBuffer{
+func NewFastObjectBuffer(opts ...FastObjectBufferOption) (*FastObjectBuffer, error) {
+	b := &FastObjectBuffer{
 		capacity: 0,
 		size:     0,
 		pageSize: DefaultObjectPageSize,
@@ -46,10 +46,10 @@ func NewFastObjectBuffer(opts ...FastObjectBufferOption) (FastObjectBuffer, erro
 	}
 
 	for _, opt := range opts {
-		opt(&b)
+		opt(b)
 	}
 	if b.pageSize == 0 || b.r < 0 {
-		return FastObjectBuffer{}, erroring.NewInvalidArgumentError("size", erroring.InvalidBufferPageSize, nil)
+		return nil, erroring.NewInvalidArgumentError("size", erroring.InvalidBufferPageSize, nil)
 	}
 
 	return b, nil

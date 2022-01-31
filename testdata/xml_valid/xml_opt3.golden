@@ -1,0 +1,13 @@
+<?xml version="1.0" encoding="utf-8" standalone="no"?>
+<pre:Vehicle xmlns:pre='urn:example-org:Transport' type='car'>
+	<seats> 4 </seats>
+	<colour> White </colour>
+	<?xml-stylesheet href = "tutorialspointstyle.css" type = "text/css"?>
+    <?welcome to pg = 10 of tutorials point?>
+
+    <?welcome?>
+	<engine>
+		<petrol/>
+		<capacity units='cc'>1598</capacity>
+	</engine>
+</pre:Vehicle>

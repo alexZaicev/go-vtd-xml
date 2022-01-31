@@ -6,4 +6,6 @@ type Reader interface {
 	SkipChar(ch uint32) bool
 	SkipCharSeq(seq string) bool
 	Decode(offset int32) (uint32, error)
+	GetOffset() int
+	SetOffset(offset int)
 }

@@ -2,6 +2,7 @@ package parser
 
 import (
 	"errors"
+	"fmt"
 
 	"github.com/alexZaicev/go-vtd-xml/vtdxml/erroring"
 )
@@ -18,42 +19,47 @@ func (p *VtdParser) Parse() error {
 	}
 
 	parserState := StateDocStart
-	var err error
 
+	var ps State
+	var err error
 	for {
+		fmt.Printf("Starting process state: %d\n", parserState)
+		fmt.Printf("Offset: %d LastOffset %d CurrentChar %d Length1 %d\n", p.offset, p.lastOffset, p.currentChar,
+			p.length1)
+
 		switch parserState {
 		case StateDocType:
-			parserState, err = p.processDocType()
+			ps, err = p.processDocType()
 		case StateDocStart:
-			parserState, err = p.processDocStart()
+			ps, err = p.processDocStart()
 		case StateDocEnd:
-			parserState, err = p.processDocEnd()
+			ps, err = p.processDocEnd()
 		case StateLtSeen:
-			parserState, err = p.processLtSeen()
+			ps, err = p.processLtSeen()
 		case StateTagStart:
-			parserState, err = p.processStartTag()
+			ps, err = p.processStartTag()
 		case StateTagEnd:
-			parserState, err = p.processEndTag()
+			ps, err = p.processEndTag()
 		case StateAttrName:
-			parserState, err = p.processAttrName()
+			ps, err = p.processAttrName()
 		case StateAttrVal:
-			parserState, err = p.processAttrVal()
+			ps, err = p.processAttrVal()
 		case StateDecAttrName:
-			parserState, err = p.processDecAttrName()
+			ps, err = p.processDecAttrName()
 		case StateText:
-			parserState, err = p.processText()
+			ps, err = p.processText()
 		case StatePiTag:
-			parserState, err = p.processPiTag()
+			ps, err = p.processPiTag()
 		case StatePiVal:
-			parserState, err = p.processPiVal()
+			ps, err = p.processPiVal()
 		case StatePiEnd:
-			parserState, err = p.processPiEnd()
+			ps, err = p.processPiEnd()
 		case StateStartComment:
-			parserState, err = p.processStartComment()
+			ps, err = p.processStartComment()
 		case StateEndComment:
-			parserState, err = p.processEndComment()
+			ps, err = p.processEndComment()
 		case StateCdata:
-			parserState, err = p.processCdata()
+			ps, err = p.processCdata()
 		default:
 			return erroring.NewParseError(
 				"invalid parser state", p.fmtLine(), nil,
@@ -64,9 +70,12 @@ func (p *VtdParser) Parse() error {
 			if err := p.finishUp(); err != nil {
 				return erroring.NewInternalError("failed to finish-up document parsing", err)
 			}
+			return nil
 		} else if err != nil {
 			return err
 		}
+
+		parserState = ps
 	}
 }
 

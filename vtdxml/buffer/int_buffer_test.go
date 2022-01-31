@@ -42,7 +42,7 @@ func Test_NewFastIntBuffer_InvalidArgument(t *testing.T) {
 
 	buffer, err := NewFastIntBuffer(WithFastIntBufferPageSize(size))
 	assert.EqualError(t, err, "invalid argument size: invalid buffer page size")
-	assert.NotNil(t, buffer)
+	assert.Nil(t, buffer)
 }
 
 func Test_FastIntBuffer_IntAt_Success(t *testing.T) {
@@ -151,7 +151,7 @@ func Test_FastIntBuffer_Clear_Success(t *testing.T) {
 	assert.Equal(t, 0, buffer.GetSize())
 }
 
-func getInitializedFastIntBuffer(t *testing.T) FastIntBuffer {
+func getInitializedFastIntBuffer(t *testing.T) *FastIntBuffer {
 	buffer, err := NewFastIntBuffer(WithFastIntBufferPageSize(defaultIntSize))
 	assert.Nil(t, err)
 	assert.NotNil(t, buffer)
@@ -161,8 +161,7 @@ func getInitializedFastIntBuffer(t *testing.T) FastIntBuffer {
 		assert.Nil(t, err)
 	}
 
-	// we expect our buffer to have exactly 1 page
-	assert.Equal(t, 1, buffer.GetSize())
+	assert.Equal(t, defaultLongBufferSize, buffer.GetSize())
 
 	intSlice, err := buffer.ToIntArray()
 	assert.Nil(t, err)

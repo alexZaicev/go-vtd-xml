@@ -4,17 +4,16 @@ import "github.com/alexZaicev/go-vtd-xml/vtdxml/erroring"
 
 func (p *VtdParser) processStartTag() (State, error) {
 	for {
-		ch, err := p.reader.GetChar()
-		if err != nil {
+		if err := p.nextChar(); err != nil {
 			return StateInvalid, err
 		}
-		if !p.xmlChar.IsNameChar(ch) {
+		if !p.xmlChar.IsNameChar(p.currentChar) {
 			break
 		}
-		if ch == ':' {
+		if p.currentChar == ':' {
 			p.length2 = p.offset - p.lastOffset - p.increment
 			if p.nsAware && p.checkXmlnsPrefix(p.lastOffset, p.length2, true) {
-				return StateInvalid, erroring.NewParseError("XMLNS cannot be element prefix", p.fmtLine(), err)
+				return StateInvalid, erroring.NewParseError("XMLNS cannot be element prefix", p.fmtLine(), nil)
 			}
 		}
 	}
@@ -97,7 +96,7 @@ func (p *VtdParser) processStartTag() (State, error) {
 	if p.currentChar == '/' {
 		p.depth--
 		p.helper = false
-		ch, err := p.reader.GetChar()
+		ch, err := p.getChar()
 		if err != nil {
 			return StateInvalid, err
 		}

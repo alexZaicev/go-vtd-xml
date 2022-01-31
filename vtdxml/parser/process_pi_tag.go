@@ -25,15 +25,15 @@ func (p *VtdParser) processPiTag() (State, error) {
 				return StateInvalid, err
 			}
 		}
-		if p.reader.SkipChar('>') {
+		if p.skipChar('>') {
 			p.lastOffset = p.offset
 			if err := p.nextCharAfterWs(); err != nil {
 				return StateInvalid, err
 			}
 			return p.getNextProcessStateFromChar(p.currentChar)
+		} else {
+			return StateInvalid, erroring.NewParseError("invalid PI termination sequence", p.fmtLine(), nil)
 		}
-	} else {
-		return StateInvalid, erroring.NewParseError("invalid PI termination sequence", p.fmtLine(), nil)
 	}
 	return StatePiVal, nil
 }

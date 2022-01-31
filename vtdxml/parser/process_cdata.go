@@ -12,9 +12,9 @@ func (p *VtdParser) processCdata() (State, error) {
 		}
 		if p.currentChar == ']' {
 			// skip all ] chars
-			for p.reader.SkipChar(']') {
+			for p.skipChar(']') {
 			}
-			if p.reader.SkipChar('>') {
+			if p.skipChar('>') {
 				break
 			}
 		}

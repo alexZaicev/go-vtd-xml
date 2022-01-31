@@ -22,7 +22,7 @@ type LongBuffer interface {
 }
 
 type FastLongBuffer struct {
-	buffer   common.ArrayList
+	buffer   *common.ArrayList
 	capacity int
 	size     int
 	exp      int
@@ -38,8 +38,8 @@ func WithFastLongBufferPageSize(size int) FastLongBufferOption {
 	}
 }
 
-func NewFastLongBuffer(opts ...FastLongBufferOption) (FastLongBuffer, error) {
-	b := FastLongBuffer{
+func NewFastLongBuffer(opts ...FastLongBufferOption) (*FastLongBuffer, error) {
+	b := &FastLongBuffer{
 		capacity: 0,
 		size:     0,
 		pageSize: DefaultLongPageSize,
@@ -49,10 +49,10 @@ func NewFastLongBuffer(opts ...FastLongBufferOption) (FastLongBuffer, error) {
 	}
 
 	for _, opt := range opts {
-		opt(&b)
+		opt(b)
 	}
 	if b.pageSize == 0 || b.r < 0 {
-		return FastLongBuffer{}, erroring.NewInvalidArgumentError("size", erroring.InvalidBufferPageSize, nil)
+		return nil, erroring.NewInvalidArgumentError("size", erroring.InvalidBufferPageSize, nil)
 	}
 
 	return b, nil
@@ -111,7 +111,7 @@ func (b *FastLongBuffer) Upper32At(index int) (int32, error) {
 	if err != nil {
 		return 0, erroring.NewInvalidArgumentError("index", erroring.IndexOutOfRange, err)
 	}
-	valueLong = valueLong & (0xFFFF << 32)
+	valueLong = valueLong & (0xFFFFFFF << 32)
 	valueLong = valueLong >> 32
 	valueInt := int32(valueLong)
 	return valueInt, nil
@@ -152,6 +152,7 @@ func (b *FastLongBuffer) Append(value int64) error {
 			return err
 		}
 		bufferSlice = append(bufferSlice, value)
+		b.size++
 		return b.buffer.Set(pageNum, bufferSlice)
 	} else {
 		b.size++

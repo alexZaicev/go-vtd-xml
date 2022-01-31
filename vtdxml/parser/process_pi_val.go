@@ -3,7 +3,7 @@ package parser
 import "github.com/alexZaicev/go-vtd-xml/vtdxml/erroring"
 
 func (p *VtdParser) processPiVal() (State, error) {
-	if p.xmlChar.IsSpaceChar(p.currentChar) {
+	if !p.xmlChar.IsSpaceChar(p.currentChar) {
 		return StateInvalid, erroring.NewParseError("invalid termination sequence", p.fmtLine(), nil)
 	}
 	p.lastOffset = p.offset
@@ -14,7 +14,7 @@ func (p *VtdParser) processPiVal() (State, error) {
 		if !p.xmlChar.IsValidChar(p.currentChar) {
 			return StateInvalid, erroring.NewParseError("invalid char in PI value", p.fmtLine(), nil)
 		}
-		if p.currentChar == '?' && p.reader.SkipChar('>') {
+		if p.currentChar == '?' && p.skipChar('>') {
 			break
 		}
 	}

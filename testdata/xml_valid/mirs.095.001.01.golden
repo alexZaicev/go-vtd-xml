@@ -1,0 +1,42 @@
+<?xml version="1.0" encoding="UTF-8" standalone="yes"?>
+<SwInt:ExchangeRequest xmlns:Sw="urn:swift:snl:ns.Sw"
+                       xmlns:SwInt="urn:swift:snl:ns.SwInt"
+                       xmlns:SwSec="urn:swift:snl:ns.SwSec">
+    <SwInt:Request>
+        <SwInt:RequestHeader>
+            <SwInt:Requestor>ou=xxx,o=citius33,o=swift</SwInt:Requestor>
+            <SwInt:Responder>ou=xxx,o=citius33,o=swift</SwInt:Responder>
+            <SwInt:Service>swift.finplus!xpf</SwInt:Service>
+            <SwInt:RequestType>mirs.095.001.01</SwInt:RequestType>
+        </SwInt:RequestHeader>
+        <SwInt:RequestPayload>
+            <AppHdr xmlns="urn:iso:std:iso:20022:tech:xsd:head.001.001.02">
+                <Fr>
+                    <FIId>
+                        <FinInstnId>
+                            <BICFI>CITIUS33AXX</BICFI>
+                        </FinInstnId>
+                    </FIId>
+                </Fr>
+                <To>
+                    <FIId>
+                        <FinInstnId>
+                            <BICFI>CITIUS33AXX</BICFI>
+                        </FinInstnId>
+                    </FIId>
+                </To>
+                <BizMsgIdr>asdasd</BizMsgIdr>
+                <MsgDefIdr>asda</MsgDefIdr>
+                <BizSvc>boe.chaps.01</BizSvc>
+                <CreDt>2021-08-30T08:03:59.000+01:00</CreDt>
+            </AppHdr>
+            <Document xmlns="urn:swift:xsd:mirs.095.001.01">
+                <ActvtnDeactvtn>
+                    <MsgId>asdasd</MsgId>
+                    <DtAndTm>2021-08-30T03:04:06.000+01:00</DtAndTm>
+                    <ActvtnDeactvtn>DEAC</ActvtnDeactvtn>
+                </ActvtnDeactvtn>
+            </Document>
+        </SwInt:RequestPayload>
+    </SwInt:Request>
+</SwInt:ExchangeRequest>

@@ -1,0 +1,9 @@
+<?xml version="2.0" encoding="UTF-8" standalone="yes"?>
+<pre:Vehicle xmlns:pre='urn:example-org:Transport' type='car'>
+	<seats> 4 </seats>
+	<colour> White </colour>
+	<engine>
+		<petrol/>
+		<capacity units='cc'>1598</capacity>
+	</engine>
+</pre:Vehicle>

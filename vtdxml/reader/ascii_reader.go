@@ -71,6 +71,14 @@ func (r *AsciiReader) Decode(offset int32) (uint32, error) {
 	return uint32(r.xmlDoc[offset]), nil
 }
 
+func (r *AsciiReader) GetOffset() int {
+	return r.offset
+}
+
+func (r *AsciiReader) SetOffset(offset int) {
+	r.offset = offset
+}
+
 // isASCII function to validate if a character is a valid ASCII character
 func (r *AsciiReader) isASCII(ch uint8) bool {
 	return ch <= unicode.MaxASCII
