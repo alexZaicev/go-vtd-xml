@@ -1,7 +1,6 @@
 package buffer
 
 import (
-	"github.com/alexZaicev/go-vtd-xml/vtdxml/common"
 	"github.com/alexZaicev/go-vtd-xml/vtdxml/erroring"
 )
 
@@ -19,7 +18,7 @@ type ObjectBuffer interface {
 }
 
 type FastObjectBuffer struct {
-	buffer   *common.ArrayList
+	buffer   [][]interface{}
 	capacity int
 	size     int
 	exp      int
@@ -42,7 +41,7 @@ func NewFastObjectBuffer(opts ...FastObjectBufferOption) (*FastObjectBuffer, err
 		pageSize: DefaultObjectPageSize,
 		exp:      10,
 		r:        DefaultObjectPageSize - 1,
-		buffer:   common.NewArrayList(),
+		buffer:   make([][]interface{}, 0, DefaultObjectPageSize),
 	}
 
 	for _, opt := range opts {
@@ -59,7 +58,7 @@ func (b *FastObjectBuffer) ObjectAt(index int) (interface{}, error) {
 	pageNum := index >> b.exp
 	offset := index & b.r
 
-	bufferSlice, err := b.buffer.Get(pageNum)
+	bufferSlice, err := b.get(pageNum)
 	if err != nil {
 		return nil, erroring.NewInvalidArgumentError("index", erroring.IndexOutOfRange, err)
 	}
@@ -72,7 +71,7 @@ func (b *FastObjectBuffer) ObjectAt(index int) (interface{}, error) {
 
 func (b *FastObjectBuffer) ModifyEntry(index int, value interface{}) error {
 	pageNum := index >> b.exp
-	bufferSlice, err := b.buffer.Get(pageNum)
+	bufferSlice, err := b.get(pageNum)
 	if err != nil {
 		return erroring.NewInvalidArgumentError("index", erroring.IndexOutOfRange, err)
 	}
@@ -82,7 +81,7 @@ func (b *FastObjectBuffer) ModifyEntry(index int, value interface{}) error {
 		return erroring.NewInvalidArgumentError("index", erroring.IndexOutOfRange, nil)
 	}
 	bufferSlice[offset] = value
-	return b.buffer.Set(pageNum, bufferSlice)
+	return b.set(pageNum, bufferSlice)
 }
 
 func (b *FastObjectBuffer) GetSize() int {
@@ -96,23 +95,35 @@ func (b *FastObjectBuffer) SetSize(size int) {
 func (b *FastObjectBuffer) Append(value interface{}) error {
 	if b.size < b.capacity {
 		pageNum := b.size >> b.exp
-		bufferSlice, err := b.buffer.Get(pageNum)
+		bufferSlice, err := b.get(pageNum)
 		if err != nil {
 			return err
 		}
 		bufferSlice = append(bufferSlice, value)
-		return b.buffer.Set(pageNum, bufferSlice)
+		return b.set(pageNum, bufferSlice)
 	} else {
 		b.size++
 		b.capacity += b.pageSize
-
-		var intBuffer []interface{}
-		intBuffer = append(intBuffer, value)
-		b.buffer.Add(intBuffer)
+		b.buffer = append(b.buffer, []interface{}{value})
 		return nil
 	}
 }
 
 func (b *FastObjectBuffer) Clear() {
 	b.size = 0
+}
+
+func (b *FastObjectBuffer) get(index int) ([]interface{}, error) {
+	if index < 0 || index >= b.size {
+		return nil, erroring.NewInvalidArgumentError("index", erroring.IndexOutOfRange, nil)
+	}
+	return b.buffer[index], nil
+}
+
+func (b *FastObjectBuffer) set(index int, value []interface{}) error {
+	if index < 0 || index >= b.size {
+		return erroring.NewInvalidArgumentError("index", erroring.IndexOutOfRange, nil)
+	}
+	b.buffer[index] = value
+	return nil
 }

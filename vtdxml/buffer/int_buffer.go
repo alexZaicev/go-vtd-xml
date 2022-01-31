@@ -1,7 +1,6 @@
 package buffer
 
 import (
-	"github.com/alexZaicev/go-vtd-xml/vtdxml/common"
 	"github.com/alexZaicev/go-vtd-xml/vtdxml/erroring"
 )
 
@@ -20,7 +19,7 @@ type IntBuffer interface {
 }
 
 type FastIntBuffer struct {
-	buffer   *common.ArrayList
+	buffer   [][]int32
 	capacity int
 	size     int
 	exp      int
@@ -45,7 +44,7 @@ func NewFastIntBuffer(opts ...FastIntBufferOption) (*FastIntBuffer, error) {
 		pageSize: DefaultIntPageSize,
 		exp:      10,
 		r:        DefaultIntPageSize - 1,
-		buffer:   common.NewArrayList(),
+		buffer:   make([][]int32, 0, DefaultLongPageSize),
 	}
 
 	for _, opt := range opts {
@@ -63,20 +62,20 @@ func (b *FastIntBuffer) IntAt(index int) (int32, error) {
 	pageNum := index >> b.exp
 	offset := index & b.r
 
-	bufferSlice, err := b.buffer.Get(pageNum)
+	bufferSlice, err := b.get(pageNum)
 	if err != nil {
 		return 0, err
 	}
 	if index < 0 || index >= len(bufferSlice) {
 		return 0, erroring.NewInvalidArgumentError("index", erroring.IndexOutOfRange, nil)
 	}
-	v := bufferSlice[offset].(int32)
+	v := bufferSlice[offset]
 	return v, nil
 }
 
 func (b *FastIntBuffer) ModifyEntry(index int, value int32) error {
 	pageNum := index >> b.exp
-	bufferSlice, err := b.buffer.Get(pageNum)
+	bufferSlice, err := b.get(pageNum)
 	if err != nil {
 		return erroring.NewInvalidArgumentError("index", erroring.IndexOutOfRange, err)
 	}
@@ -86,7 +85,7 @@ func (b *FastIntBuffer) ModifyEntry(index int, value int32) error {
 		return erroring.NewInvalidArgumentError("index", erroring.IndexOutOfRange, nil)
 	}
 	bufferSlice[offset] = value
-	return b.buffer.Set(pageNum, bufferSlice)
+	return b.set(pageNum, bufferSlice)
 }
 
 func (b *FastIntBuffer) GetSize() int {
@@ -108,14 +107,14 @@ func (b *FastIntBuffer) ToIntArray() ([]int32, error) {
 
 	for i := 0; size > 0; i++ {
 		// get buffer page slice
-		buffer, err := b.buffer.Get(i)
+		buffer, err := b.get(i)
 		if err != nil {
 			// if error occurs stop iteration and return error
 			return nil, err
 		}
 		// load-in buffer page into int32 slice
 		for j := range buffer {
-			v := buffer[j].(int32)
+			v := buffer[j]
 			intArray = append(intArray, v)
 		}
 		// subtract buffer size with read page size
@@ -127,24 +126,36 @@ func (b *FastIntBuffer) ToIntArray() ([]int32, error) {
 func (b *FastIntBuffer) Append(value int32) error {
 	if b.size < b.capacity {
 		pageNum := b.size >> b.exp
-		bufferSlice, err := b.buffer.Get(pageNum)
+		bufferSlice, err := b.get(pageNum)
 		if err != nil {
 			return err
 		}
 		bufferSlice = append(bufferSlice, value)
 		b.size++
-		return b.buffer.Set(pageNum, bufferSlice)
+		return b.set(pageNum, bufferSlice)
 	} else {
 		b.size++
 		b.capacity += b.pageSize
-
-		var intBuffer []interface{}
-		intBuffer = append(intBuffer, value)
-		b.buffer.Add(intBuffer)
+		b.buffer = append(b.buffer, []int32{value})
 		return nil
 	}
 }
 
 func (b *FastIntBuffer) Clear() {
 	b.size = 0
+}
+
+func (b *FastIntBuffer) get(index int) ([]int32, error) {
+	if index < 0 || index >= b.size {
+		return nil, erroring.NewInvalidArgumentError("index", erroring.IndexOutOfRange, nil)
+	}
+	return b.buffer[index], nil
+}
+
+func (b *FastIntBuffer) set(index int, value []int32) error {
+	if index < 0 || index >= b.size {
+		return erroring.NewInvalidArgumentError("index", erroring.IndexOutOfRange, nil)
+	}
+	b.buffer[index] = value
+	return nil
 }

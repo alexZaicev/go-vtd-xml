@@ -22,7 +22,6 @@ func Test_NewFastObjectBuffer_Success(t *testing.T) {
 	assert.Equal(t, defaultObjectBufferSize, buffer.pageSize)
 	assert.Equal(t, defaultObjectBufferSize-1, buffer.r)
 	assert.NotNil(t, buffer.buffer)
-	assert.Equal(t, 0, buffer.buffer.Size())
 
 	expectedPageSize := 1 << defaultObjectSize
 
@@ -35,7 +34,6 @@ func Test_NewFastObjectBuffer_Success(t *testing.T) {
 	assert.Equal(t, expectedPageSize, buffer.pageSize)
 	assert.Equal(t, expectedPageSize-1, buffer.r)
 	assert.NotNil(t, buffer.buffer)
-	assert.Equal(t, 0, buffer.buffer.Size())
 }
 
 func Test_NewFastObjectBuffer_InvalidArgument(t *testing.T) {

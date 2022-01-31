@@ -21,7 +21,6 @@ func Test_NewFastLongBuffer_Success(t *testing.T) {
 	assert.Equal(t, defaultLongBufferSize, buffer.pageSize)
 	assert.Equal(t, defaultLongBufferSize-1, buffer.r)
 	assert.NotNil(t, buffer.buffer)
-	assert.Equal(t, 0, buffer.buffer.Size())
 
 	expectedPageSize := 1 << defaultLongSize
 
@@ -34,7 +33,6 @@ func Test_NewFastLongBuffer_Success(t *testing.T) {
 	assert.Equal(t, expectedPageSize, buffer.pageSize)
 	assert.Equal(t, expectedPageSize-1, buffer.r)
 	assert.NotNil(t, buffer.buffer)
-	assert.Equal(t, 0, buffer.buffer.Size())
 }
 
 func Test_NewFastLongBuffer_InvalidArgument(t *testing.T) {
