@@ -12,17 +12,17 @@ type AsciiReader struct {
 	endOffset int
 }
 
-func NewAsciiReader(xmlDoc []byte, offset, endOffset int) (AsciiReader, error) {
+func NewAsciiReader(xmlDoc []byte, offset, endOffset int) (*AsciiReader, error) {
 	if xmlDoc == nil {
-		return AsciiReader{}, erroring.NewInvalidArgumentError("xmlDoc", erroring.CannotBeNil, nil)
+		return nil, erroring.NewInvalidArgumentError("xmlDoc", erroring.CannotBeNil, nil)
 	}
 	if offset < 0 {
-		return AsciiReader{}, erroring.NewInvalidArgumentError("offset", erroring.IndexOutOfRange, nil)
+		return nil, erroring.NewInvalidArgumentError("offset", erroring.IndexOutOfRange, nil)
 	}
 	if endOffset < 0 || endOffset >= len(xmlDoc) {
-		return AsciiReader{}, erroring.NewInvalidArgumentError("endOffset", erroring.IndexOutOfRange, nil)
+		return nil, erroring.NewInvalidArgumentError("endOffset", erroring.IndexOutOfRange, nil)
 	}
-	return AsciiReader{
+	return &AsciiReader{
 		xmlDoc:    xmlDoc,
 		offset:    offset,
 		endOffset: endOffset,
@@ -41,7 +41,7 @@ func (r *AsciiReader) GetChar() (uint32, error) {
 	return uint32(ch), nil
 }
 
-func (r *AsciiReader) GetLongChar(offset int32) (uint64, error) {
+func (r *AsciiReader) GetLongCharAt(offset int32) (uint64, error) {
 	ch := r.xmlDoc[offset]
 	if ch == byte('\r') && r.xmlDoc[offset+1] == byte('\n') {
 		return (2 << 32) | '\n', nil
@@ -67,7 +67,7 @@ func (r *AsciiReader) SkipCharSeq(seq string) bool {
 	return true
 }
 
-func (r *AsciiReader) Decode(offset int32) (uint32, error) {
+func (r *AsciiReader) GetCharAt(offset int32) (uint32, error) {
 	return uint32(r.xmlDoc[offset]), nil
 }
 

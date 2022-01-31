@@ -34,7 +34,7 @@ func (p *VtdParser) init() error {
 	if err != nil {
 		return err
 	}
-	p.reader = &r
+	p.reader = r
 
 	if p.shallowDepth {
 		if err := p.initWithShallowDepth(); err != nil {

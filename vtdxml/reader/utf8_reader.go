@@ -12,17 +12,17 @@ type Utf8Reader struct {
 	endOffset int
 }
 
-func NewUtf8Reader(xmlDoc []byte, offset, endOffset int) (Utf8Reader, error) {
+func NewUtf8Reader(xmlDoc []byte, offset, endOffset int) (*Utf8Reader, error) {
 	if xmlDoc == nil {
-		return Utf8Reader{}, erroring.NewInvalidArgumentError("xmlDoc", erroring.CannotBeNil, nil)
+		return nil, erroring.NewInvalidArgumentError("xmlDoc", erroring.CannotBeNil, nil)
 	}
 	if offset < 0 {
-		return Utf8Reader{}, erroring.NewInvalidArgumentError("offset", erroring.IndexOutOfRange, nil)
+		return nil, erroring.NewInvalidArgumentError("offset", erroring.IndexOutOfRange, nil)
 	}
 	if endOffset < 0 || endOffset > len(xmlDoc) {
-		return Utf8Reader{}, erroring.NewInvalidArgumentError("endOffset", erroring.IndexOutOfRange, nil)
+		return nil, erroring.NewInvalidArgumentError("endOffset", erroring.IndexOutOfRange, nil)
 	}
-	return Utf8Reader{
+	return &Utf8Reader{
 		xmlDoc:    xmlDoc,
 		offset:    offset,
 		endOffset: endOffset,
@@ -36,17 +36,21 @@ func (r *Utf8Reader) GetChar() (uint32, error) {
 	ch := r.xmlDoc[r.offset]
 	r.offset++
 	if !r.isUTF8(ch) {
-		return 0, erroring.NewParseError("invalid ASCII character", "", nil)
+		return 0, erroring.NewParseError("invalid UTF-8 character", "", nil)
 	}
 	return uint32(ch), nil
 }
 
-func (r *Utf8Reader) GetLongChar(offset int32) (uint64, error) {
+func (r *Utf8Reader) GetLongCharAt(offset int32) (uint64, error) {
 	ch := r.xmlDoc[offset]
 	if ch == byte('\r') && r.xmlDoc[offset+1] == byte('\n') {
 		return (2 << 32) | '\n', nil
 	}
 	return (1 << 32) | uint64(ch), nil
+}
+
+func (r *Utf8Reader) GetCharAt(offset int32) (uint32, error) {
+	return uint32(r.xmlDoc[offset]), nil
 }
 
 func (r *Utf8Reader) SkipChar(ch uint32) bool {
@@ -65,10 +69,6 @@ func (r *Utf8Reader) SkipCharSeq(seq string) bool {
 		}
 	}
 	return true
-}
-
-func (r *Utf8Reader) Decode(offset int32) (uint32, error) {
-	return uint32(r.xmlDoc[offset]), nil
 }
 
 func (r *Utf8Reader) GetOffset() int {

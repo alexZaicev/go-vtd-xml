@@ -29,7 +29,7 @@ func Test_VtdParser_Parse_WithoutNsAware_Success(t *testing.T) {
 				WithXmlDoc(readTestData(t, name, true)),
 			}...)
 			assert.Nil(t, err)
-			assert.NotNil(t, *parser)
+			assert.NotNil(t, parser)
 
 			assert.Nil(t, parser.Parse())
 		})
@@ -45,7 +45,7 @@ func Test_VtdParser_Parse_WithNsAware_Success(t *testing.T) {
 				WithNameSpaceAware(true),
 			}...)
 			assert.Nil(t, err)
-			assert.NotNil(t, *parser)
+			assert.NotNil(t, parser)
 
 			assert.Nil(t, parser.Parse())
 		})
@@ -103,7 +103,7 @@ func Test_VtdParser_Parse_WithoutNsAware_InvalidDocument(t *testing.T) {
 				WithNameSpaceAware(false),
 			}...)
 			assert.Nil(t, err)
-			assert.NotNil(t, *parser)
+			assert.NotNil(t, parser)
 
 			err = parser.Parse()
 			assert.NotNil(t, err)

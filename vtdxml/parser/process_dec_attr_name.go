@@ -248,7 +248,7 @@ func (p *VtdParser) checkAsciiEncoding() error {
 	if err != nil {
 		return err
 	}
-	p.reader = &r
+	p.reader = r
 	if err := p.writeVtd(TokenDecAttrVal, p.lastOffset, 5, p.depth); err != nil {
 		return err
 	}
@@ -267,7 +267,7 @@ func (p *VtdParser) checkUsAsciiEncoding() error {
 	if err != nil {
 		return err
 	}
-	p.reader = &r
+	p.reader = r
 	if err := p.writeVtd(TokenDecAttrVal, p.lastOffset, 8, p.depth); err != nil {
 		return err
 	}

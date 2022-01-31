@@ -300,7 +300,7 @@ func (p *VtdParser) getCharResolved(offset int) (int64, error) {
 
 	var val int32
 	inc := 2 << (p.increment - 1)
-	ch64, err := p.reader.GetLongChar(int32(offset))
+	ch64, err := p.reader.GetLongCharAt(int32(offset))
 	if err != nil {
 		return 0, err
 	}
@@ -443,7 +443,7 @@ func (p *VtdParser) getCharUnit(offset int) (int32, error) {
 	if p.encoding <= 2 {
 		return int32(p.xmlDoc[offset] & 0xff), nil
 	} else if p.encoding < FormatUtf16BE {
-		ch, err := p.reader.Decode(int32(offset))
+		ch, err := p.reader.GetCharAt(int32(offset))
 		if err != nil {
 			return 0, err
 		}
