@@ -25,3 +25,5 @@ unit:
 		awk 'BEGIN {cov=0; stat=0;} $$3!="" { cov+=($$3==1?$$2:0); stat+=$$2; } \
 		END {printf("Total coverage: %.2f%% of statements\n", (cov/stat)*100);}'
 	go tool cover -html=c.out -o unit_test_coverage.html
+
+ci: build lint unit
