@@ -1,6 +1,9 @@
 package parser
 
-import "github.com/alexZaicev/go-vtd-xml/vtdxml/erroring"
+import (
+	"github.com/alexZaicev/go-vtd-xml/vtdxml/common"
+	"github.com/alexZaicev/go-vtd-xml/vtdxml/erroring"
+)
 
 func (p *VtdParser) processPiTag() (State, error) {
 	for {
@@ -12,16 +15,16 @@ func (p *VtdParser) processPiTag() (State, error) {
 		}
 	}
 	p.length1 = p.offset - p.lastOffset - p.increment
-	if err := p.writeVtdWithLengthCheck(TokenPiName, "PI name too long >0xFFFFF"); err != nil {
+	if err := p.writeVtdWithLengthCheck(common.TokenPiName, "PI name too long >0xFFFFF"); err != nil {
 		return StateInvalid, err
 	}
 	if p.currentChar == '?' {
 		if p.singleByteEncoding {
-			if err := p.writeVtd(TokenPiVal, p.lastOffset, 0, p.depth); err != nil {
+			if err := p.writeVtd(common.TokenPiVal, p.lastOffset, 0, p.depth); err != nil {
 				return StateInvalid, err
 			}
 		} else {
-			if err := p.writeVtd(TokenPiVal, p.lastOffset>>1, 0, p.depth); err != nil {
+			if err := p.writeVtd(common.TokenPiVal, p.lastOffset>>1, 0, p.depth); err != nil {
 				return StateInvalid, err
 			}
 		}

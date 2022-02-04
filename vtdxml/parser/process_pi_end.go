@@ -1,6 +1,9 @@
 package parser
 
-import "github.com/alexZaicev/go-vtd-xml/vtdxml/erroring"
+import (
+	"github.com/alexZaicev/go-vtd-xml/vtdxml/common"
+	"github.com/alexZaicev/go-vtd-xml/vtdxml/erroring"
+)
 
 func (p *VtdParser) processPiEnd() (State, error) {
 	if err := p.nextChar(); err != nil {
@@ -29,7 +32,7 @@ func (p *VtdParser) processPiEnd() (State, error) {
 	}
 
 	p.length1 = p.offset - p.lastOffset - p.increment
-	if err := p.writeVtdWithLengthCheck(TokenPiName, "PI name too long (>0xFFFF)"); err != nil {
+	if err := p.writeVtdWithLengthCheck(common.TokenPiName, "PI name too long (>0xFFFF)"); err != nil {
 		return StateInvalid, err
 	}
 	p.lastOffset = p.offset
@@ -49,16 +52,16 @@ func (p *VtdParser) processPiEnd() (State, error) {
 			}
 		}
 		p.length1 = p.offset - p.lastOffset - (p.increment << 1)
-		if err := p.writeVtdWithLengthCheck(TokenPiVal, "PI value too long (>0xFFFF)"); err != nil {
+		if err := p.writeVtdWithLengthCheck(common.TokenPiVal, "PI value too long (>0xFFFF)"); err != nil {
 			return StateInvalid, err
 		}
 	} else {
 		if p.singleByteEncoding {
-			if err := p.writeVtd(TokenPiVal, p.lastOffset, 0, p.depth); err != nil {
+			if err := p.writeVtd(common.TokenPiVal, p.lastOffset, 0, p.depth); err != nil {
 				return StateInvalid, err
 			}
 		} else {
-			if err := p.writeVtd(TokenPiVal, p.lastOffset>>1, 0, p.depth); err != nil {
+			if err := p.writeVtd(common.TokenPiVal, p.lastOffset>>1, 0, p.depth); err != nil {
 				return StateInvalid, err
 			}
 		}

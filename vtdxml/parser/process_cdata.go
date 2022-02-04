@@ -1,6 +1,9 @@
 package parser
 
-import "github.com/alexZaicev/go-vtd-xml/vtdxml/erroring"
+import (
+	"github.com/alexZaicev/go-vtd-xml/vtdxml/common"
+	"github.com/alexZaicev/go-vtd-xml/vtdxml/erroring"
+)
 
 func (p *VtdParser) processCdata() (State, error) {
 	for {
@@ -21,11 +24,11 @@ func (p *VtdParser) processCdata() (State, error) {
 	}
 	p.length1 = p.offset - p.lastOffset - (p.increment << 1) - p.increment
 	if p.singleByteEncoding {
-		if err := p.writeVtdText(TokenCdataVal, p.lastOffset, p.length1, p.depth); err != nil {
+		if err := p.writeVtdText(common.TokenCdataVal, p.lastOffset, p.length1, p.depth); err != nil {
 			return StateInvalid, err
 		}
 	} else {
-		if err := p.writeVtdText(TokenCdataVal, p.lastOffset>>1, p.length1>>1, p.depth); err != nil {
+		if err := p.writeVtdText(common.TokenCdataVal, p.lastOffset>>1, p.length1>>1, p.depth); err != nil {
 			return StateInvalid, err
 		}
 	}

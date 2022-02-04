@@ -1,6 +1,9 @@
 package parser
 
-import "github.com/alexZaicev/go-vtd-xml/vtdxml/erroring"
+import (
+	"github.com/alexZaicev/go-vtd-xml/vtdxml/common"
+	"github.com/alexZaicev/go-vtd-xml/vtdxml/erroring"
+)
 
 func (p *VtdParser) processDocType() (State, error) {
 	z := 1
@@ -24,7 +27,7 @@ func (p *VtdParser) processDocType() (State, error) {
 	}
 
 	p.length1 = p.offset - p.lastOffset - p.increment
-	if err := p.writeVtdWithLengthCheck(TokenDtdVal, "DTD value too long >0xFFFFF"); err != nil {
+	if err := p.writeVtdWithLengthCheck(common.TokenDtdVal, "DTD value too long >0xFFFFF"); err != nil {
 		return StateInvalid, err
 	}
 	if err := p.nextCharAfterWs(); err != nil {

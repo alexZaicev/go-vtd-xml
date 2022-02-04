@@ -3,6 +3,7 @@ package parser
 import (
 	"fmt"
 
+	"github.com/alexZaicev/go-vtd-xml/vtdxml/common"
 	"github.com/alexZaicev/go-vtd-xml/vtdxml/erroring"
 )
 
@@ -57,10 +58,10 @@ func (p *VtdParser) processAttrName() (State, error) {
 		return StateInvalid, err
 	}
 
-	tokenType := TokenAttrName
+	tokenType := common.TokenAttrName
 	errMsg := erroring.AttrNamePrefixQnameTooLong
 	if p.isNs {
-		tokenType = TokenAttrNs
+		tokenType = common.TokenAttrNs
 		errMsg = erroring.AttrNsPrefixQnameTooLong
 		if p.nsAware && p.length2 != 0 && !p.isXml {
 			val := int64((p.length2<<16|p.length1)<<32 | p.lastOffset)

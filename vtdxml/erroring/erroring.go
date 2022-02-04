@@ -10,7 +10,11 @@ var InternalErrorType = &InternalError{}
 
 var ParseErrorType = &ParseError{}
 
+var NavigationErrorType = &NavigationError{}
+
 var EncodingErrorType = &EncodingError{}
+
+var DecodingErrorType = &DecodingError{}
 
 var EntityErrorType = &EntityError{}
 
@@ -112,6 +116,24 @@ func NewParseError(msg string, lineNumber string, err error) *ParseError {
 	}
 }
 
+// NavigationError represent a some sort of navigation error that may occur trying to
+// perform illegal navigation operations over XML file.
+type NavigationError struct {
+	baseError
+	Msg string
+}
+
+// NewNavigationError constructs a new NavigationError, wrapping the provided error.
+func NewNavigationError(msg string, err error) *ParseError {
+	return &ParseError{
+		baseError: newBaseError(
+			fmt.Sprintf("a navigation error occurred: %s", msg),
+			err,
+		),
+		Msg: msg,
+	}
+}
+
 // EncodingError represents some sort of character encoding error that may occur
 // during reading string with incorrect reader
 type EncodingError struct {
@@ -122,6 +144,24 @@ type EncodingError struct {
 // NewEncodingError constructs a new EncodingError, wrapping the provided error.
 func NewEncodingError(msg string) *EncodingError {
 	return &EncodingError{
+		baseError: newBaseError(
+			fmt.Sprintf("unknown character encoding: %s", msg),
+			nil,
+		),
+		Msg: msg,
+	}
+}
+
+// DecodingError represents some sort of character decoding error that may occur
+// during decoding invalid character of a specific format
+type DecodingError struct {
+	baseError
+	Msg string
+}
+
+// NewDecodingError constructs a new DecodingError, wrapping the provided error.
+func NewDecodingError(msg string) *DecodingError {
+	return &DecodingError{
 		baseError: newBaseError(
 			fmt.Sprintf("unknown character encoding: %s", msg),
 			nil,

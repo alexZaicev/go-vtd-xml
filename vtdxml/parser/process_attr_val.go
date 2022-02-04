@@ -3,6 +3,7 @@ package parser
 import (
 	"fmt"
 
+	"github.com/alexZaicev/go-vtd-xml/vtdxml/common"
 	"github.com/alexZaicev/go-vtd-xml/vtdxml/erroring"
 )
 
@@ -81,7 +82,7 @@ func (p *VtdParser) processAttrVal() (State, error) {
 			}
 		}
 	}
-	if err := p.writeVtdWithLengthCheck(TokenAttrVal, erroring.AttrValueTooLong); err != nil {
+	if err := p.writeVtdWithLengthCheck(common.TokenAttrVal, erroring.AttrValueTooLong); err != nil {
 		return StateInvalid, err
 	}
 	p.isXml, p.isNs = false, false
@@ -364,7 +365,7 @@ func (p *VtdParser) getCharResolved(offset int) (int64, error) {
 			if err != nil {
 				return 0, err
 			}
-			if p.encoding < FormatUtf16BE {
+			if p.encoding < common.FormatUtf16BE {
 				if ch2 == 'm' {
 					// checks that the sequence matcher &amp;
 					if err := checkSeq("p;", offset, 1); err != nil {
@@ -401,7 +402,7 @@ func (p *VtdParser) getCharResolved(offset int) (int64, error) {
 		}
 	case 'q':
 		{
-			if p.encoding < FormatUtf16BE {
+			if p.encoding < common.FormatUtf16BE {
 				if err := checkSeq("uot;", offset, 1); err != nil {
 					return 0, err
 				}
@@ -417,7 +418,7 @@ func (p *VtdParser) getCharResolved(offset int) (int64, error) {
 		}
 	case 'g', 'l':
 		{
-			if p.encoding < FormatUtf16BE {
+			if p.encoding < common.FormatUtf16BE {
 				if err := checkSeq("t;", offset, 1); err != nil {
 					return 0, err
 				}
@@ -442,13 +443,13 @@ func (p *VtdParser) getCharResolved(offset int) (int64, error) {
 func (p *VtdParser) getCharUnit(offset int) (int32, error) {
 	if p.encoding <= 2 {
 		return int32(p.xmlDoc[offset] & 0xff), nil
-	} else if p.encoding < FormatUtf16BE {
+	} else if p.encoding < common.FormatUtf16BE {
 		ch, err := p.reader.GetCharAt(int32(offset))
 		if err != nil {
 			return 0, err
 		}
 		return int32(ch), nil
-	} else if p.encoding == FormatUtf16BE {
+	} else if p.encoding == common.FormatUtf16BE {
 		return int32(p.xmlDoc[offset])<<8 | int32(p.xmlDoc[offset+1]), nil
 	} else {
 		return int32(p.xmlDoc[offset+1])<<8 | int32(p.xmlDoc[offset]), nil

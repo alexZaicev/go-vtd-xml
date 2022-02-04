@@ -63,7 +63,7 @@ func (b *FastLongBuffer) LongAt(index int) (int64, error) {
 
 	bufferSlice, err := b.get(pageNum)
 	if err != nil {
-		return 0, erroring.NewInvalidArgumentError("index", erroring.IndexOutOfRange, err)
+		return 0, erroring.NewInvalidArgumentError("index", erroring.IndexOutOfRange, nil)
 	}
 	if index < 0 || index >= len(bufferSlice) {
 		return 0, erroring.NewInvalidArgumentError("index", erroring.IndexOutOfRange, nil)

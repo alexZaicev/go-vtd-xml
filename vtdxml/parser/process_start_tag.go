@@ -1,6 +1,9 @@
 package parser
 
-import "github.com/alexZaicev/go-vtd-xml/vtdxml/erroring"
+import (
+	"github.com/alexZaicev/go-vtd-xml/vtdxml/common"
+	"github.com/alexZaicev/go-vtd-xml/vtdxml/erroring"
+)
 
 func (p *VtdParser) processStartTag() (State, error) {
 	for {
@@ -35,11 +38,11 @@ func (p *VtdParser) processStartTag() (State, error) {
 			return StateInvalid, erroring.NewParseError(erroring.TagPrefixQnameTooLong, p.fmtLine(), nil)
 		}
 		if p.shallowDepth {
-			if err := p.writeVtd(TokenStartingTag, p.lastOffset, (p.length2<<1)|p.length1, p.depth); err != nil {
+			if err := p.writeVtd(common.TokenStartingTag, p.lastOffset, (p.length2<<1)|p.length1, p.depth); err != nil {
 				return StateInvalid, err
 			}
 		} else {
-			if err := p.writeVtdL5(TokenStartingTag, p.lastOffset, (p.length2<<1)|p.length1, p.depth); err != nil {
+			if err := p.writeVtdL5(common.TokenStartingTag, p.lastOffset, (p.length2<<1)|p.length1, p.depth); err != nil {
 				return StateInvalid, err
 			}
 		}
@@ -48,12 +51,12 @@ func (p *VtdParser) processStartTag() (State, error) {
 			return StateInvalid, erroring.NewParseError(erroring.TagPrefixQnameTooLong, p.fmtLine(), nil)
 		}
 		if p.shallowDepth {
-			if err := p.writeVtd(TokenStartingTag, p.lastOffset>>1, (p.length2<<10)|(p.length1>>1),
+			if err := p.writeVtd(common.TokenStartingTag, p.lastOffset>>1, (p.length2<<10)|(p.length1>>1),
 				p.depth); err != nil {
 				return StateInvalid, err
 			}
 		} else {
-			if err := p.writeVtdL5(TokenStartingTag, p.lastOffset>>1, (p.length2<<10)|(p.length1>>1),
+			if err := p.writeVtdL5(common.TokenStartingTag, p.lastOffset>>1, (p.length2<<10)|(p.length1>>1),
 				p.depth); err != nil {
 				return StateInvalid, err
 			}

@@ -4,26 +4,8 @@ import (
 	"fmt"
 	"strings"
 
+	"github.com/alexZaicev/go-vtd-xml/vtdxml/common"
 	"github.com/alexZaicev/go-vtd-xml/vtdxml/erroring"
-)
-
-type Token int64
-
-const (
-	TokenStartingTag Token = iota
-	TokenEndingTag
-	TokenAttrName
-	TokenAttrNs
-	TokenAttrVal
-	TokenCharacterData
-	TokenComment
-	TokenPiName
-	TokenPiVal
-	TokenDecAttrName
-	TokenDecAttrVal
-	TokenCdataVal
-	TokenDtdVal
-	TokenDocument
 )
 
 type State int
@@ -46,40 +28,6 @@ const (
 	StateDocType
 	StatePiEnd
 	StateInvalid State = -1
-)
-
-type FormatEncoding int
-
-const (
-	FormatAscii FormatEncoding = iota
-	FormatIso88591
-	FormatIso88592
-	FormatIso88593
-	FormatIso88594
-	FormatIso88595
-	FormatIso88596
-	FormatIso88597
-	FormatIso88598
-	FormatIso88599
-	FormatIso885910
-	FormatIso885911
-	FormatIso885912
-	FormatIso885913
-	FormatIso885914
-	FormatIso885915
-	FormatIso885916
-	FormatUtf16BE
-	FormatUtf16LE
-	FormatUtf8
-	FormatWin1250
-	FormatWin1251
-	FormatWin1252
-	FormatWin1253
-	FormatWin1254
-	FormatWin1255
-	FormatWin1256
-	FormatWin1257
-	FormatWin1258
 )
 
 const (
@@ -176,7 +124,7 @@ func (p *VtdParser) nextCharAfterWs() error {
 }
 
 // writeVtd function writes into VTD buffer
-func (p *VtdParser) writeVtd(tokenType Token, offset, length, depth int) error {
+func (p *VtdParser) writeVtd(tokenType common.Token, offset, length, depth int) error {
 	offset64, length64, depth64 := int64(offset), int64(length), int64(depth)
 	a := int64(tokenType << 28)
 	b := (a | ((depth64 & 0xff) << 20) | length64) << 32
@@ -184,7 +132,7 @@ func (p *VtdParser) writeVtd(tokenType Token, offset, length, depth int) error {
 }
 
 // writeVtdL5 function writes into VTD buffer and location cache
-func (p *VtdParser) writeVtdL5(tokenType Token, offset, length, depth int) error {
+func (p *VtdParser) writeVtdL5(tokenType common.Token, offset, length, depth int) error {
 	if err := p.writeVtd(tokenType, offset, length, depth); err != nil {
 		return err
 	}
@@ -293,7 +241,7 @@ func (p *VtdParser) writeVtdL5(tokenType Token, offset, length, depth int) error
 }
 
 // writeVtdText function writes token text into VTD buffer
-func (p *VtdParser) writeVtdText(tokenType Token, offset, length, depth int) error {
+func (p *VtdParser) writeVtdText(tokenType common.Token, offset, length, depth int) error {
 	if length > maxTokenLength {
 		var j, rOffset int
 		for j = length; j > maxTokenLength; j -= maxTokenLength {
@@ -308,7 +256,7 @@ func (p *VtdParser) writeVtdText(tokenType Token, offset, length, depth int) err
 	}
 }
 
-func (p *VtdParser) writeVtdWithLengthCheck(tokenType Token, errMsg string) error {
+func (p *VtdParser) writeVtdWithLengthCheck(tokenType common.Token, errMsg string) error {
 	if p.singleByteEncoding {
 		if p.length1 > maxTokenLength {
 			return erroring.NewParseError(errMsg, p.fmtLine(), nil)
@@ -339,7 +287,7 @@ func (p *VtdParser) fmtCustomLine(offset int) string {
 	so := p.docOffset
 	lineNumber, lineOffset := 0, 0
 
-	if p.encoding < FormatUtf16BE {
+	if p.encoding < common.FormatUtf16BE {
 		for so <= offset-1 {
 			if p.xmlDoc[so] == '\n' {
 				lineNumber++
@@ -348,7 +296,7 @@ func (p *VtdParser) fmtCustomLine(offset int) string {
 			so++
 		}
 		lineOffset = offset - lineOffset
-	} else if p.encoding == FormatUtf16BE {
+	} else if p.encoding == common.FormatUtf16BE {
 		for so <= offset-2 {
 			if p.xmlDoc[so+1] == '\n' && p.xmlDoc[so] == 0 {
 				lineNumber++
@@ -374,18 +322,18 @@ func (p *VtdParser) fmtCustomLine(offset int) string {
 func (p *VtdParser) getPrevOffset() (int, error) {
 	prevOffset := p.offset
 	switch p.encoding {
-	case FormatUtf8:
+	case common.FormatUtf8:
 		for p.xmlDoc[prevOffset]&byte(0xc0) == byte(0x80) {
 			prevOffset--
 		}
 		return prevOffset, nil
-	case FormatAscii, FormatIso88591, FormatIso88592, FormatIso88593, FormatIso88594,
-		FormatIso88595, FormatIso88596, FormatIso88597, FormatIso88598, FormatIso88599,
-		FormatIso885910, FormatIso885911, FormatIso885912, FormatIso885913, FormatIso885914,
-		FormatIso885915, FormatIso885916, FormatWin1250, FormatWin1251, FormatWin1252,
-		FormatWin1253, FormatWin1254, FormatWin1255, FormatWin1256, FormatWin1257, FormatWin1258:
+	case common.FormatAscii, common.FormatIso88591, common.FormatIso88592, common.FormatIso88593, common.FormatIso88594,
+		common.FormatIso88595, common.FormatIso88596, common.FormatIso88597, common.FormatIso88598, common.FormatIso88599,
+		common.FormatIso885910, common.FormatIso885911, common.FormatIso885912, common.FormatIso885913, common.FormatIso885914,
+		common.FormatIso885915, common.FormatIso885916, common.FormatWin1250, common.FormatWin1251, common.FormatWin1252,
+		common.FormatWin1253, common.FormatWin1254, common.FormatWin1255, common.FormatWin1256, common.FormatWin1257, common.FormatWin1258:
 		return p.offset - 1, nil
-	case FormatUtf16LE, FormatUtf16BE:
+	case common.FormatUtf16LE, common.FormatUtf16BE:
 		temp := (uint32(p.xmlDoc[p.offset])&0xFFFF)<<8 | (uint32(p.xmlDoc[p.offset+1]) & 0xFFFF)
 		if temp < 0xd800 || temp > 0xdfff {
 			return p.offset - 2, nil
@@ -400,7 +348,7 @@ func (p *VtdParser) decideEncoding() error {
 		p.increment = 2
 		if int32(p.xmlDoc[p.offset+1]) == -1 {
 			p.offset += 2
-			p.encoding = FormatUtf16BE
+			p.encoding = common.FormatUtf16BE
 			p.bomDetected = true
 			// g.reader = reader.NewUtf16BeReader()
 		} else {
@@ -410,7 +358,7 @@ func (p *VtdParser) decideEncoding() error {
 		p.increment = 2
 		if int32(p.xmlDoc[p.offset+1]) == -2 {
 			p.offset += 2
-			p.encoding = FormatUtf16LE
+			p.encoding = common.FormatUtf16LE
 			p.bomDetected = true
 			// g.reader = reader.NewUtf16LeReader()
 		} else {
@@ -420,7 +368,7 @@ func (p *VtdParser) decideEncoding() error {
 		if int32(p.xmlDoc[p.offset+1]) == 0x3c &&
 			int32(p.xmlDoc[p.offset+2]) == 0 &&
 			int32(p.xmlDoc[p.offset+3]) == 0x3f {
-			p.encoding = FormatUtf16BE
+			p.encoding = common.FormatUtf16BE
 			p.increment = 2
 			// g.reader = reader.NewUtf16BeReader()
 		} else {
@@ -438,14 +386,14 @@ func (p *VtdParser) decideEncoding() error {
 		if int32(p.xmlDoc[p.offset+1]) == 0 &&
 			int32(p.xmlDoc[p.offset+2]) == 0x3f &&
 			int32(p.xmlDoc[p.offset+3]) == 0 {
-			p.encoding = FormatUtf16LE
+			p.encoding = common.FormatUtf16LE
 			p.increment = 2
 			// g.reader = reader.NewUtf16LeReader()
 		}
 		// no need to return error if failed the condition
 	}
 
-	if p.encoding < FormatUtf16BE {
+	if p.encoding < common.FormatUtf16BE {
 		if p.nsAware {
 			if (p.offset + p.docLength) >= 1<<30 {
 				return erroring.NewInternalError("file size too big >= 1GB", nil)
@@ -461,7 +409,7 @@ func (p *VtdParser) decideEncoding() error {
 		}
 	}
 
-	if p.encoding >= FormatUtf16BE {
+	if p.encoding >= common.FormatUtf16BE {
 		p.singleByteEncoding = false
 	}
 	return nil
@@ -472,11 +420,11 @@ func (p *VtdParser) decideEncoding() error {
 // of the expected sequence
 func (p *VtdParser) checkXmlPrefix(offset, length int, checkLength bool) bool {
 	var valid bool
-	if p.encoding < FormatUtf16BE {
+	if p.encoding < common.FormatUtf16BE {
 		valid = p.xmlDoc[offset] == 'x' &&
 			p.xmlDoc[offset+1] == 'm' &&
 			p.xmlDoc[offset+2] == 'l'
-	} else if p.encoding == FormatUtf16BE {
+	} else if p.encoding == common.FormatUtf16BE {
 		valid = p.xmlDoc[offset] == 0 &&
 			p.xmlDoc[offset+1] == 'x' &&
 			p.xmlDoc[offset+2] == 0 &&
@@ -493,7 +441,7 @@ func (p *VtdParser) checkXmlPrefix(offset, length int, checkLength bool) bool {
 	}
 
 	if valid && checkLength {
-		valid = (p.encoding < FormatUtf16BE && length == 4) || length == 8
+		valid = (p.encoding < common.FormatUtf16BE && length == 4) || length == 8
 	}
 	return valid
 }
@@ -503,13 +451,13 @@ func (p *VtdParser) checkXmlPrefix(offset, length int, checkLength bool) bool {
 // of the expected sequence
 func (p *VtdParser) checkXmlnsPrefix(offset, length int, checkLength bool) bool {
 	var valid bool
-	if p.encoding < FormatUtf16BE {
+	if p.encoding < common.FormatUtf16BE {
 		valid = p.xmlDoc[offset] == 'x' &&
 			p.xmlDoc[offset+1] == 'm' &&
 			p.xmlDoc[offset+2] == 'l' &&
 			p.xmlDoc[offset+3] == 'n' &&
 			p.xmlDoc[offset+4] == 's'
-	} else if p.encoding == FormatUtf16BE {
+	} else if p.encoding == common.FormatUtf16BE {
 		valid = p.xmlDoc[offset] == 0 &&
 			p.xmlDoc[offset+1] == 'x' &&
 			p.xmlDoc[offset+2] == 0 &&
@@ -534,7 +482,7 @@ func (p *VtdParser) checkXmlnsPrefix(offset, length int, checkLength bool) bool 
 	}
 
 	if valid && checkLength {
-		valid = (p.encoding < FormatUtf16BE && length == 5) || length == 10
+		valid = (p.encoding < common.FormatUtf16BE && length == 5) || length == 10
 	}
 	return valid
 }
@@ -583,9 +531,9 @@ func (p *VtdParser) recordWhiteSpace() error {
 		length := p.offset - p.increment - p.lastOffset
 		if length != 0 {
 			if p.singleByteEncoding {
-				return p.writeVtdText(TokenCharacterData, p.lastOffset, length, p.depth)
+				return p.writeVtdText(common.TokenCharacterData, p.lastOffset, length, p.depth)
 			} else {
-				return p.writeVtdText(TokenCharacterData, p.lastOffset>>1, length>>1, p.depth)
+				return p.writeVtdText(common.TokenCharacterData, p.lastOffset>>1, length>>1, p.depth)
 			}
 		}
 	}

@@ -1,6 +1,9 @@
 package parser
 
-import "github.com/alexZaicev/go-vtd-xml/vtdxml/erroring"
+import (
+	"github.com/alexZaicev/go-vtd-xml/vtdxml/common"
+	"github.com/alexZaicev/go-vtd-xml/vtdxml/erroring"
+)
 
 func (p *VtdParser) processPiVal() (State, error) {
 	if !p.xmlChar.IsSpaceChar(p.currentChar) {
@@ -19,7 +22,7 @@ func (p *VtdParser) processPiVal() (State, error) {
 		}
 	}
 	p.length1 = p.offset - p.lastOffset - (p.increment << 1)
-	if err := p.writeVtdWithLengthCheck(TokenPiVal, "PI value too long (>0xFFFF"); err != nil {
+	if err := p.writeVtdWithLengthCheck(common.TokenPiVal, "PI value too long (>0xFFFF"); err != nil {
 		return StateInvalid, err
 	}
 	p.lastOffset = p.offset

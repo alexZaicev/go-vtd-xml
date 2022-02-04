@@ -1,6 +1,9 @@
 package parser
 
-import "github.com/alexZaicev/go-vtd-xml/vtdxml/erroring"
+import (
+	"github.com/alexZaicev/go-vtd-xml/vtdxml/common"
+	"github.com/alexZaicev/go-vtd-xml/vtdxml/erroring"
+)
 
 func (p *VtdParser) processEndComment() (State, error) {
 	for {
@@ -19,11 +22,11 @@ func (p *VtdParser) processEndComment() (State, error) {
 		return StateInvalid, erroring.NewParseError("invalid terminating sequence, --> expected", p.fmtLine(), nil)
 	}
 	if p.singleByteEncoding {
-		if err := p.writeVtdText(TokenComment, p.lastOffset, p.length1, p.depth); err != nil {
+		if err := p.writeVtdText(common.TokenComment, p.lastOffset, p.length1, p.depth); err != nil {
 			return StateInvalid, err
 		}
 	} else {
-		if err := p.writeVtd(TokenComment, p.lastOffset>>1, p.length1>>1, p.depth); err != nil {
+		if err := p.writeVtd(common.TokenComment, p.lastOffset>>1, p.length1>>1, p.depth); err != nil {
 			return StateInvalid, err
 		}
 	}

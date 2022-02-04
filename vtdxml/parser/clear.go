@@ -1,6 +1,6 @@
 package parser
 
-func (p *VtdParser) clear() error {
+func (p *VtdParser) Clear() error {
 	// TODO implement
 	return nil
 }

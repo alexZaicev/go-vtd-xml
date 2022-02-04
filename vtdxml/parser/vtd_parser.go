@@ -49,7 +49,7 @@ type VtdParser struct {
 	singleByteEncoding, bomDetected, mustUtf8, shallowDepth, helper, ws bool
 	isXml                                                               bool
 	bufferReuse                                                         bool
-	encoding                                                            FormatEncoding
+	encoding                                                            common.FormatEncoding
 	xmlChar                                                             *common.XmlChar
 	vtdBuffer, l1Buffer, l2Buffer, l3Buffer, l4Buffer, l5Buffer         buffer.LongBuffer
 	nsBuffer1                                                           buffer.IntBuffer

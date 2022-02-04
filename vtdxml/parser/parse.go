@@ -4,6 +4,7 @@ import (
 	"errors"
 	"fmt"
 
+	"github.com/alexZaicev/go-vtd-xml/vtdxml/common"
 	"github.com/alexZaicev/go-vtd-xml/vtdxml/erroring"
 )
 
@@ -14,7 +15,7 @@ func (p *VtdParser) Parse() error {
 	if err := p.decideEncoding(); err != nil {
 		return err
 	}
-	if err := p.writeVtd(TokenDocument, 0, 0, p.depth); err != nil {
+	if err := p.writeVtd(common.TokenDocument, 0, 0, p.depth); err != nil {
 		return err
 	}
 
