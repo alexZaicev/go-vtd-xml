@@ -31,6 +31,8 @@ type VtdNav struct {
 	xmlChar                                 *common.XmlChar
 	xmlBuffer                               buffer.ByteBuffer
 	vtdBuffer, l1Buffer, l2Buffer, l3Buffer buffer.LongBuffer
+	l1index, l2index, l3index               int
+	l2lower, l2upper, l3lower, l3upper      int32
 }
 
 func NewVtdNav(
