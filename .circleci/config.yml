@@ -15,8 +15,16 @@ jobs:
     steps:
       - checkout
       - run:
+          name: Create tmp directory for artifacts
+          command: mkdir -p /tmp/artifacts
+      - run:
           name: Run unit tests
-          command: make unit
+          command: |
+            make unit
+            mv coverage.html /tmp/artifacts
+      - store_artifacts:
+          path: /tmp/artifacts
+
 
 # Invoke jobs via workflows
 # See: https://circleci.com/docs/2.0/configuration-reference/#workflows
