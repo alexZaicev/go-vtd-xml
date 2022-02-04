@@ -1,7 +1,7 @@
 # go-vtd-xml
 
 [![CircleCI Build Status](https://circleci.com/gh/CircleCI-Public/circleci-demo-go.svg?style=shield)](https://circleci.com/gh/alexZaicev/go-vtd-xml)
-[![Coverage Status](https://coveralls.io/repos/github/alexZaicev/go-vtd-xml/badge.svg?branch=main)](https://coveralls.io/github/alexZaicev/go-vtd-xml?branch=main)
+[![Coverage Status](https://coveralls.io/repos/github/alexZaicev/go-vtd-xml/badge.svg)](https://coveralls.io/github/alexZaicev/go-vtd-xml)
 [![MIT Licensed](https://img.shields.io/badge/license-MIT-blue.svg)](https://raw.githubusercontent.com/alexZaicev/go-vtd-xml/main/LICENSE.md)
 
 ### TODO
