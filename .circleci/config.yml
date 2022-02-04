@@ -10,6 +10,8 @@ jobs:
     # See: https://circleci.com/docs/2.0/configuration-reference/#docker-machine-macos-windows-executor
     docker:
       - image: circleci/golang:1.16
+    environment:
+      COVERALLS_TOKEN: Kcr4Sxgiw5KgX6xbBhb3J6wsME60GpLgi
     # Add steps to the job
     # See: https://circleci.com/docs/2.0/configuration-reference/#steps
     steps:
@@ -24,7 +26,11 @@ jobs:
             mv unit_test_coverage.html /tmp/artifacts
       - store_artifacts:
           path: /tmp/artifacts
-
+      - run:
+          name: Publish Coveralls
+          command: |
+            go install github.com/mattn/goveralls@latest
+            /home/ubuntu/.go_workspace/bin/goveralls -coverprofile=/home/ubuntu/c.out -service=circle-ci -repotoken=$COVERALLS_TOKEN
 
 # Invoke jobs via workflows
 # See: https://circleci.com/docs/2.0/configuration-reference/#workflows
