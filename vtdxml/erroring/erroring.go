@@ -204,3 +204,20 @@ func NewEOFError(msg string) *EOFError {
 		Msg: msg,
 	}
 }
+
+// ModifyError represents some sort of XML modification error
+type ModifyError struct {
+	baseError
+	Msg string
+}
+
+// NewModifyError constructs a new ModifyError, wrapping the provided error.
+func NewModifyError(msg string) *ModifyError {
+	return &ModifyError{
+		baseError: newBaseError(
+			fmt.Sprintf("a modify error occurred: %s", msg),
+			nil,
+		),
+		Msg: msg,
+	}
+}

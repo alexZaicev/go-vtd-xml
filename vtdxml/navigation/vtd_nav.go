@@ -6,7 +6,12 @@ import (
 )
 
 type Nav interface {
+	GetEncoding() common.FormatEncoding
+
+	GetVtdBufferSize() int
+
 	GetCurrentIndex() (int32, error)
+
 	GetTokenType(index int) (int32, error)
 	GetTokenOffset(index int) (int32, error)
 	GetTokenLength(index int) (int32, error)

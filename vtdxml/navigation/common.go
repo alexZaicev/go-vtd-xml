@@ -132,3 +132,11 @@ func (n *VtdNav) GetTokenLength(index int) (int32, error) {
 // 	res := (uint64(val) & common.MaskTokenFullLength) >> 32
 // 	return int(res), nil
 // }
+
+func (n *VtdNav) GetVtdBufferSize() int {
+	return n.vtdBuffer.GetSize()
+}
+
+func (n *VtdNav) GetEncoding() common.FormatEncoding {
+	return n.encoding
+}
